@@ -871,37 +871,49 @@ slLine.addEventListener('input', () => {
 async function initCamera() {
   if (camRunning) return;
   try {
-    // Android では environment を先に試み、失敗したら any で再試行
+    // Android 14 + Chrome: getUserMedia制約を段階的に緩める
     let stream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: 'environment' } }, audio: false
-      });
-    } catch(_) {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: true, audio: false
-      });
+    const constraints = [
+      // ① 理想的な設定（解像度控えめ・Android14推奨）
+      { video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }, audio: false },
+      // ② facingModeのみ
+      { video: { facingMode: 'environment' }, audio: false },
+      // ③ 制約なし（最終手段）
+      { video: true, audio: false }
+    ];
+    for (const c of constraints) {
+      try { stream = await navigator.mediaDevices.getUserMedia(c); break; }
+      catch(e) { console.warn('getUserMedia failed:', c, e); }
     }
+    if (!stream) throw new Error('No camera available');
+
     videoStream = stream;
+
+    // Android 14: srcObject設定前にvideoを設定
+    video.setAttribute('autoplay', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('muted', '');
+    video.muted = true;
     video.srcObject = stream;
     camRunning = true;
 
-    // Android は play() を明示的に await する
-    await video.play().catch(() => {});
+    // play()を明示的にawait（Android 14 Chromeで必要）
+    await video.play().catch(e => console.warn('play() warning:', e));
 
-    // loadedmetadata + 念押しで 300ms 後にもリサイズ
-    video.addEventListener('loadedmetadata', () => {
-      resizeOverlayCanvas();
-      setTimeout(resizeOverlayCanvas, 300);
-    });
+    // Android 14はloadedmetadataが遅れることがある
+    // → 複数タイミングでリサイズを試みる
+    const tryResize = () => {
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        resizeOverlayCanvas();
+      }
+    };
+    video.addEventListener('loadedmetadata', tryResize);
+    video.addEventListener('loadeddata',     tryResize);
+    video.addEventListener('canplay',        tryResize);
     video.addEventListener('resize', resizeOverlayCanvas);
     window.addEventListener('resize', resizeOverlayCanvas);
-
-    // すでにメタデータが来ていた場合の保険
-    if (video.readyState >= 1) {
-      resizeOverlayCanvas();
-      setTimeout(resizeOverlayCanvas, 300);
-    }
+    // 念押し：100ms / 500ms / 1000ms 後にもリサイズ試行
+    [100, 500, 1000].forEach(t => setTimeout(tryResize, t));
 
     requestAnimationFrame(renderLoop);
   } catch(e) {
