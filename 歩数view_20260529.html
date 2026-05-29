@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歩数分割スケール可変ツール - スロットドラム版</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --poke-red: #E3350D;
+            --poke-blue: #316CB6;
+            --poke-yellow: #FFCB05;
+            --poke-dark: #2A2A2A;
+            --bg-stripe: rgba(255, 255, 255, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--poke-yellow);
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 20px,
+                var(--bg-stripe) 20px,
+                var(--bg-stripe) 40px
+            );
+            color: var(--poke-dark);
+            padding: 20px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            border: 4px solid var(--poke-dark);
+            border-radius: 16px;
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 550px;
+            overflow: hidden;
+        }
+
+        h1 {
+            background-color: var(--poke-red);
+            color: #ffffff;
+            text-align: center;
+            font-size: 1.5rem;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-bottom: 4px solid var(--poke-dark);
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px var(--poke-dark), -1px -1px 0px var(--poke-dark), 1px -1px 0px var(--poke-dark), -1px 1px 0px var(--poke-dark);
+        }
+
+        .content-wrapper {
+            padding: 0 15px 25px 15px;
+        }
+
+        .input-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 230px;
+            border: 3px solid var(--poke-blue);
+            border-radius: 12px;
+            background-color: #F2F8FF;
+            position: relative;
+            padding: 25px 12px 12px 12px;
+            margin-top: 10px;
+        }
+
+        .input-group-title {
+            position: absolute;
+            top: -14px;
+            left: 15px;
+            background-color: var(--poke-blue);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 2px solid var(--poke-dark);
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-row label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--poke-blue);
+            white-space: nowrap;
+        }
+
+        /* 🎰 スロットドラム（リール）のスタイル */
+        .slot-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slot-reel {
+            width: 70px;
+            height: 46px;
+            background: #ffffff;
+            border: 3px solid var(--poke-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: ns-resize; /* 上下スクロール可能なカーソル */
+            box-shadow: inset 0px 4px 8px rgba(0,0,0,0.15), inset 0px -4px 8px rgba(0,0,0,0.15);
+        }
+
+        /* ドラムのシャドウ（立体感を出すグラデーション） */
+        .slot-reel::before, .slot-reel::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        .slot-reel::before {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2), transparent);
+        }
+        .slot-reel::after {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.2), transparent);
+        }
+
+        .slot-strip {
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.15s ease-out; /* 回転の滑らかさ */
+        }
+
+        .slot-number {
+            height: 40px; /* 枠の高さ46px - ボーダー分を考慮した位置に配置 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--poke-dark);
+        }
+
+        .unit-label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+            min-width: 16px;
+        }
+
+        /* 結果表示部 */
+        .result-section {
+            background: var(--poke-yellow);
+            border: 3px solid var(--poke-dark);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .result-section::before {
+            content: '★ けっか ★';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            border: 2px solid var(--poke-dark);
+            padding: 2px 15px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: var(--poke-red);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .result-box-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--poke-dark);
+            margin-bottom: 4px;
+        }
+
+        .result-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--poke-red);
+            background: #ffffff;
+            border: 2px solid var(--poke-dark);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f8f9fa;
+            border: 3px dashed #ccd6dd;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .canvas-wrapper {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            background: #ffffff;
+            border: 3px solid var(--poke-dark);
+            border-radius: 8px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .ratio-badge-container {
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        #ratioLabel {
+            background: var(--poke-blue);
+            color: #fff;
+            padding: 5px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            border: 2px solid var(--poke-dark);
+            display: inline-block;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ほすう ぶんかつ ツール</h1>
+
+    <div class="content-wrapper">
+        <div class="input-form">
+            <div class="input-group">
+                <div class="input-group-title">せってい X</div>
+                <div class="form-row">
+                    <label>そう歩数(X)</label>
+                    <div class="slot-container">
+                        <div class="slot-reel" id="reel_stepX">
+                            <div class="slot-strip" id="strip_stepX"></div>
+                        </div>
+                        <span class="unit-label">歩</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>とう分数(X)</label>
+                    <div class="slot-container">
+                        <div class="slot-reel" id="reel_splitX">
+                            <div class="slot-strip" id="strip_splitX"></div>
+                        </div>
+                        <span class="unit-label"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-group-title">せってい Y</div>
+                <div class="form-row">
+                    <label>そう歩数(Y)</label>
+                    <div class="slot-container">
+                        <div class="slot-reel" id="reel_stepY">
+                            <div class="slot-strip" id="strip_stepY"></div>
+                        </div>
+                        <span class="unit-label">歩</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>とう分数(Y)</label>
+                    <div class="slot-container">
+                        <div class="slot-reel" id="reel_splitY">
+                            <div class="slot-strip" id="strip_splitY"></div>
+                        </div>
+                        <span class="unit-label"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <div class="result-grid">
+                <div>
+                    <div class="result-box-title">X(よこ) 1マスの歩数</div>
+                    <div class="result-value" id="resultX">- 歩</div>
+                </div>
+                <div>
+                    <div class="result-box-title">Y(たて) 1マスの歩数</div>
+                    <div class="result-value" id="resultY">- 歩</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <div class="canvas-wrapper">
+                <canvas id="visualCanvas" width="540" height="540"></canvas>
+            </div>
+            <div class="ratio-badge-container">
+                <span id="ratioLabel">比率 X:Y</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // データモデルの定義
+    const config = {
+        stepX: { val: 25, min: 1, max: 150 },
+        splitX: { val: 4, min: 1, max: 20 },
+        stepY: { val: 22, min: 1, max: 150 },
+        splitY: { val: 3, min: 1, max: 20 }
+    };
+
+    const resultXDisplay = document.getElementById('resultX');
+    const resultYDisplay = document.getElementById('resultY');
+    const ratioLabel = document.getElementById('ratioLabel');
+    const canvas = document.getElementById('visualCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const BASE_CANVAS_SIZE = 540;
+    const PADDING_LEFT = 65;    
+    const PADDING_BOTTOM = 45;  
+    const PADDING_TOP = 25;     
+    const PADDING_RIGHT = 25;   
+    const ITEM_HEIGHT = 40; // 1数字あたりの高さ
+
+    // スロットマシンのリール(ドラム)を生成・初期化する関数
+    function initReel(key) {
+        const reel = document.getElementById(`reel_${key}`);
+        const strip = document.getElementById(`strip_${key}`);
+        const item = config[key];
+
+        // 数字の一覧を縦にズラリと生成
+        let html = '';
+        for (let i = item.min; i <= item.max; i++) {
+            html += `<div class="slot-number">${i}</div>`;
+        }
+        strip.innerHTML = html;
+
+        // リールの位置を現在値に合わせる関数
+        function updateReelPosition() {
+            const index = item.val - item.min;
+            // 枠のセンター(中央)に見えるようにオフセット調整
+            const yOffset = - (index * ITEM_HEIGHT) + 3;
+            strip.style.transform = `translateY(${yOffset}px)`;
+        }
+
+        // ① マウスホイール(スクロール)での操作
+        reel.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY > 0) {
+                if (item.val > item.min) item.val--;
+            } else {
+                if (item.val < item.max) item.val++;
+            }
+            updateReelPosition();
+            calculateAndVisualise();
+        }, { passive: false });
+
+        // ② タッチ・スワイプ/ドラッグでの操作 (スマホ・PC両対応)
+        let startY = 0;
+        let isDragging = false;
+
+        function dragStart(y) {
+            startY = y;
+            isDragging = true;
+        }
+
+        function dragMove(y) {
+            if (!isDragging) return;
+            const diffY = y - startY;
+            // 一定距離以上引っ張ったら数値を増減
+            if (Math.abs(diffY) > 15) {
+                if (diffY > 0) {
+                    if (item.val > item.min) item.val--;
+                } else {
+                    if (item.val < item.max) item.val++;
+                }
+                startY = y; // 原点をリセットして連続スクロールに対応
+                updateReelPosition();
+                calculateAndVisualise();
+            }
+        }
+
+        function dragEnd() {
+            isDragging = false;
+        }
+
+        // マウスイベント登録
+        reel.addEventListener('mousedown', (e) => dragStart(e.clientY));
+        window.addEventListener('mousemove', (e) => dragMove(e.clientY));
+        window.addEventListener('mouseup', dragEnd);
+
+        // タッチイベント登録
+        reel.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientY));
+        reel.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            dragMove(e.touches[0].clientY);
+        }, { passive: false });
+        reel.addEventListener('touchend', dragEnd);
+
+        // 初期配置を実行
+        updateReelPosition();
+    }
+
+    // 文字のクッキリ縁取り関数
+    function drawTextWithStroke(text, x, y, fillColor, strokeColor = '#ffffff', strokeWidth = 4) {
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = fillColor;
+        ctx.fillText(text, x, y);
+    }
+
+    // キャンバス描画システム
+    function drawGridAndLabels(stepX, stepY, splitX, splitY) {
+        const maxDrawWidth = BASE_CANVAS_SIZE - PADDING_LEFT - PADDING_RIGHT;
+        const maxDrawHeight = BASE_CANVAS_SIZE - PADDING_TOP - PADDING_BOTTOM;
+
+        let gridWidth, gridHeight;
+        if (stepX >= stepY) {
+            gridWidth = maxDrawWidth;
+            gridHeight = maxDrawHeight * (stepY / stepX);
+        } else {
+            gridHeight = maxDrawHeight;
+            gridWidth = maxDrawWidth * (stepX / stepY);
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const startX = PADDING_LEFT;
+        const startY = PADDING_TOP + (maxDrawHeight - gridHeight);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(startX, startY, gridWidth, gridHeight);
+
+        const cellWidth = gridWidth / splitX;
+        const cellHeight = gridHeight / splitY;
+
+        ctx.strokeStyle = '#316CB6';
+        ctx.lineWidth = 2;
+
+        for (let i = 1; i < splitX; i++) {
+            const x = startX + (i * cellWidth);
+            ctx.beginPath();
+            ctx.moveTo(x, startY);
+            ctx.lineTo(x, startY + gridHeight);
+            ctx.stroke();
+        }
+        for (let i = 1; i < splitY; i++) {
+            const y = startY + (i * cellHeight);
+            ctx.beginPath();
+            ctx.moveTo(startX, y);
+            ctx.lineTo(startX + gridWidth, y);
+            ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#2A2A2A';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(startX, startY, gridWidth, gridHeight);
+
+        if (splitX <= 15 && splitY <= 15) {
+            const fontSize = Math.min(cellWidth, cellHeight) * 0.23;
+            ctx.font = `bold ${Math.max(12, Math.min(fontSize, 18))}px 'M PLUS Rounded 1c', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let x = 0; x < splitX; x++) {
+                for (let y = 0; y < splitY; y++) {
+                    const posX = startX + (x * cellWidth) + (cellWidth / 2);
+                    const posY = startY + gridHeight - (y * cellHeight) - (cellHeight / 2);
+                    drawTextWithStroke(`${x+1},${y+1}`, posX, posY, '#2A2A2A');
+                }
+            }
+        }
+
+        ctx.font = `bold 14px 'M PLUS Rounded 1c', sans-serif`;
+
+        ctx.textBaseline = 'top';
+        ctx.textAlign = 'center';
+        drawTextWithStroke('0 歩', startX, startY + gridHeight + 10, '#316CB6');
+        drawTextWithStroke(`${stepX.toLocaleString()} 歩`, startX + gridWidth, startY + gridHeight + 10, '#316CB6');
+
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        drawTextWithStroke('0 歩', startX - 10, startY + gridHeight, '#316CB6');
+        drawTextWithStroke(`${stepY.toLocaleString()} 歩`, startX - 10, startY, '#316CB6');
+    }
+
+    // 計算とデータ連動
+    function calculateAndVisualise() {
+        const stepX = config.stepX.val;
+        const splitX = config.splitX.val;
+        const stepY = config.stepY.val;
+        const splitY = config.splitY.val;
+
+        const ratioX = Math.round((stepX / stepY) * 100) / 100;
+        ratioLabel.textContent = `比率 (X:Y) = ${ratioX} : 1`;
+
+        const calculatedX = Math.round((stepX / splitX) * 10) / 10;
+        resultXDisplay.textContent = calculatedX.toLocaleString() + ' 歩';
+
+        const calculatedY = Math.round((stepY / splitY) * 10) / 10;
+        resultYDisplay.textContent = calculatedY.toLocaleString() + ' 歩';
+
+        drawGridAndLabels(stepX, stepY, splitX, splitY);
+    }
+
+    // 全てのリールを初期化
+    Object.keys(config).forEach(initReel);
+
+    // 初回描画
+    calculateAndVisualise();
+</script>
+</body>
+</html>

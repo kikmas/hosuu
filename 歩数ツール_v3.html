@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>歩数分割スケール シミュレーター</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Oswald:wght@600;700&family=Roboto+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+/* ─── Design Tokens ─────────────────────────── */
+:root {
+  --red:      #E3350D;
+  --blue:     #1D5FA8;
+  --blue-lt:  #EBF2FB;
+  --yellow:   #FFCB05;
+  --dark:     #18181B;
+  --mid:      #52525B;
+  --muted:    #A1A1AA;
+  --bg:       #F4F5F7;
+  --white:    #FFFFFF;
+  --purple:   #6D28D9;
+  --purple-lt:#F3F0FF;
+  --green:    #059669;
+  --border:   3px solid var(--dark);
+
+  /* フォント */
+  --f-display: 'Oswald', 'Noto Sans JP', sans-serif;
+  --f-body:    'Noto Sans JP', sans-serif;
+  --f-mono:    'Roboto Mono', monospace;
+
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
+  --shadow:    4px 4px 0 var(--dark);
+}
+
+*,*::before,*::after {
+  box-sizing: border-box; margin:0; padding:0;
+  -webkit-user-select:none; user-select:none;
+}
+
+body {
+  font-family: var(--f-body);
+  background: var(--dark);
+  color: var(--dark);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 28px 14px 52px;
+  background-image:
+    radial-gradient(circle, rgba(255,203,5,.15) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgba(29,95,168,.10) 1px,   transparent 1px);
+  background-size: 30px 30px, 15px 15px;
+  background-position: 0 0, 7.5px 7.5px;
+}
+
+/* ─── Shell ─────────────────────────────────── */
+.shell {
+  width: 100%; max-width: 580px;
+}
+
+/* ─── Header ─────────────────────────────────── */
+.header {
+  background: var(--red);
+  border: var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 20px 24px 18px;
+  position: relative; overflow: hidden;
+}
+.header::after {
+  content:'';
+  position:absolute; inset:0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent, transparent 6px,
+    rgba(0,0,0,.04) 6px, rgba(0,0,0,.04) 12px
+  );
+  pointer-events:none;
+}
+.header-inner {
+  position:relative;
+  display:flex; align-items:center; gap:16px;
+}
+.header-icon {
+  width:48px; height:48px; flex-shrink:0;
+  background: var(--yellow);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  display:flex; align-items:center; justify-content:center;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow);
+}
+.header-titles { flex:1; }
+.header-ja {
+  font-family: var(--f-body);
+  font-weight:900;
+  font-size:1.05rem;
+  color:#fff;
+  letter-spacing:.06em;
+  line-height:1.2;
+}
+.header-en {
+  font-family: var(--f-display);
+  font-size:1.4rem;
+  font-weight:700;
+  color: var(--yellow);
+  letter-spacing:.12em;
+  line-height:1.1;
+  text-transform:uppercase;
+}
+.version-chip {
+  flex-shrink:0;
+  font-family: var(--f-mono);
+  font-size:.65rem;
+  font-weight:600;
+  background: rgba(255,255,255,.15);
+  color:#fff;
+  border:2px solid rgba(255,255,255,.3);
+  border-radius:50px;
+  padding:3px 12px;
+  letter-spacing:.08em;
+}
+
+/* ─── Body Card ──────────────────────────────── */
+.body-card {
+  background: var(--white);
+  border: var(--border);
+  border-top:0;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding: 24px 20px 28px;
+  box-shadow: var(--shadow);
+}
+
+/* ─── Section Header ─────────────────────────── */
+.sec-head {
+  display:flex; align-items:baseline; gap:8px;
+  margin-bottom:14px;
+}
+.sec-head-ja {
+  font-family: var(--f-body);
+  font-weight:900;
+  font-size:.8rem;
+  color: var(--dark);
+  letter-spacing:.08em;
+}
+.sec-head-en {
+  font-family: var(--f-display);
+  font-size:.7rem;
+  font-weight:600;
+  color: var(--muted);
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+.sec-rule {
+  flex:1; height:2px;
+  background: linear-gradient(to right, var(--dark), transparent);
+  border-radius:2px;
+}
+
+/* ─── Input Grid ─────────────────────────────── */
+.input-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:22px;
+}
+
+.axis-panel {
+  border: var(--border);
+  border-radius: var(--radius-md);
+  overflow:hidden;
+}
+.axis-panel-head {
+  padding:8px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.axis-panel-head .axis-ja {
+  font-family: var(--f-body);
+  font-weight:900;
+  font-size:.8rem;
+  color:#fff;
+  letter-spacing:.06em;
+}
+.axis-panel-head .axis-en {
+  font-family: var(--f-display);
+  font-size:.65rem;
+  font-weight:600;
+  letter-spacing:.15em;
+  color:rgba(255,255,255,.65);
+  text-transform:uppercase;
+}
+.axis-x .axis-panel-head { background: var(--blue); }
+.axis-y .axis-panel-head { background: var(--purple); }
+
+.axis-panel-body {
+  padding:14px 12px 12px;
+  background: var(--bg);
+  display:flex; flex-direction:column; gap:14px;
+}
+
+/* フィールドラベル */
+.field { display:flex; flex-direction:column; gap:5px; }
+.field-label {
+  display:flex; align-items:baseline; gap:5px;
+}
+.field-label-ja {
+  font-family: var(--f-body);
+  font-weight:700;
+  font-size:.7rem;
+  color: var(--mid);
+}
+.field-label-en {
+  font-family: var(--f-display);
+  font-size:.6rem;
+  font-weight:600;
+  letter-spacing:.12em;
+  color: var(--muted);
+  text-transform:uppercase;
+}
+
+/* ─── Slot Drum ───────────────────────────────── */
+.slot-reel {
+  width:100%; height:54px;
+  background: var(--white);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  overflow:hidden;
+  position:relative;
+  cursor:ns-resize;
+  touch-action:none;
+  box-shadow: inset 0 6px 12px rgba(0,0,0,.10),
+              inset 0 -6px 12px rgba(0,0,0,.10);
+}
+.slot-reel::before,.slot-reel::after {
+  content:'';
+  position:absolute; left:0; width:100%; height:18px;
+  z-index:2; pointer-events:none;
+}
+.slot-reel::before { top:0;    background:linear-gradient(to bottom,rgba(0,0,0,.22),transparent); }
+.slot-reel::after  { bottom:0; background:linear-gradient(to top,   rgba(0,0,0,.22),transparent); }
+.slot-midline {
+  position:absolute; top:50%; left:0; right:0;
+  height:2px; background:rgba(29,95,168,.18);
+  transform:translateY(-50%);
+  z-index:3; pointer-events:none;
+}
+.slot-strip {
+  position:absolute; width:100%; top:0; left:0;
+  display:flex; flex-direction:column;
+  transition:transform .09s cubic-bezier(.25,.8,.25,1);
+  pointer-events:none;
+}
+.slot-number {
+  height:48px;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--f-mono);
+  font-size:1.45rem;
+  font-weight:600;
+  color: var(--dark);
+  letter-spacing:.04em;
+}
+/* スワイプ方向ヒント */
+.reel-hint {
+  position:absolute; right:7px; top:50%;
+  transform:translateY(-50%);
+  z-index:4; pointer-events:none;
+  display:flex; flex-direction:column; align-items:center;
+  gap:1px; opacity:.18;
+}
+.reel-hint span {
+  font-size:.5rem;
+  color: var(--dark);
+  line-height:1;
+  display:block;
+}
+
+/* ─── Split Stepper ──────────────────────────── */
+.stepper {
+  display:flex; align-items:center;
+  background: var(--white);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  overflow:hidden; height:42px;
+}
+.step-btn {
+  width:40px; height:100%; flex-shrink:0;
+  background: #EBEBEB;
+  border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--f-display);
+  font-size:.85rem; font-weight:700;
+  color: var(--dark);
+  transition:background .1s, transform .06s;
+}
+.step-btn:active { background:#D4D4D4; transform:scale(.9); }
+.step-btn:focus  { outline:none; }
+.step-btn-l { border-right:2px solid var(--dark); }
+.step-btn-r { border-left: 2px solid var(--dark); }
+.step-val {
+  flex:1; text-align:center;
+  font-family: var(--f-mono);
+  font-size:1.15rem; font-weight:600;
+  color: var(--dark);
+  letter-spacing:.04em;
+}
+
+/* ─── Result Section ─────────────────────────── */
+.result-band {
+  background: var(--yellow);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  padding:18px 16px 14px;
+  margin-bottom:22px;
+  position:relative; overflow:hidden;
+}
+.result-band::before {
+  content:'';
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(
+    90deg,
+    transparent, transparent 10px,
+    rgba(255,255,255,.3) 10px, rgba(255,255,255,.3) 11px
+  );
+  pointer-events:none;
+}
+.result-grid {
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+.result-box {
+  background: var(--white);
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  padding:12px 10px 10px;
+  text-align:center;
+  position:relative; overflow:hidden;
+}
+.result-box-top {
+  position:absolute; top:0; left:0; right:0; height:4px;
+}
+.result-box.x-box .result-box-top { background:var(--blue); }
+.result-box.y-box .result-box-top { background:var(--purple); }
+
+.result-label-ja {
+  font-family: var(--f-body);
+  font-size:.68rem; font-weight:700;
+  color: var(--mid); letter-spacing:.04em;
+  margin-bottom:2px;
+}
+.result-label-en {
+  font-family: var(--f-display);
+  font-size:.58rem; font-weight:600;
+  color: var(--muted); letter-spacing:.12em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+  display:block;
+}
+.result-num {
+  font-family: var(--f-mono);
+  font-size:1.8rem; font-weight:600;
+  color: var(--red);
+  letter-spacing:.02em;
+  line-height:1;
+}
+.result-unit {
+  font-family: var(--f-body);
+  font-size:.72rem; font-weight:700;
+  color: var(--muted);
+  margin-top:4px;
+}
+
+/* 比率バッジ */
+.ratio-bar {
+  position:relative;
+  display:flex; justify-content:center;
+  margin-top:14px;
+}
+.ratio-badge {
+  background: var(--dark);
+  color: var(--yellow);
+  border: 2px solid var(--dark);
+  border-radius:50px;
+  padding:5px 20px;
+  font-family: var(--f-mono);
+  font-size:.75rem; font-weight:600;
+  letter-spacing:.08em;
+  box-shadow: 2px 2px 0 rgba(0,0,0,.25);
+}
+
+/* ─── Canvas Section ─────────────────────────── */
+.canvas-section {
+  background: var(--bg);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  padding:16px;
+}
+.canvas-wrap {
+  width:100%; max-width:490px;
+  margin:14px auto 0;
+}
+canvas {
+  width:100%; height:auto;
+  display:block;
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  background:#fff;
+}
+
+/* ─── Footer ─────────────────────────────────── */
+.footer {
+  text-align:center;
+  margin-top:20px;
+  font-family: var(--f-display);
+  font-size:.6rem;
+  letter-spacing:.18em;
+  color:rgba(255,255,255,.25);
+  text-transform:uppercase;
+}
+
+/* ─── Pop animation ──────────────────────────── */
+@keyframes numPop {
+  0%  { transform:scale(1); }
+  35% { transform:scale(1.12); }
+  100%{ transform:scale(1); }
+}
+.result-num.pop { animation:numPop .2s ease-out; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-icon">⊞</div>
+      <div class="header-titles">
+        <div class="header-ja">歩数分割スケール シミュレーター</div>
+        <div class="header-en">Step Scale Simulator</div>
+      </div>
+      <div class="version-chip">v3.0</div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <div class="body-card">
+
+    <!-- INPUT -->
+    <div class="sec-head">
+      <span class="sec-head-ja">入力</span>
+      <span class="sec-head-en">Settings</span>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="input-grid">
+
+      <!-- X軸 -->
+      <div class="axis-panel axis-x">
+        <div class="axis-panel-head">
+          <span class="axis-ja">X 軸（横）</span>
+          <span class="axis-en">Horizontal</span>
+        </div>
+        <div class="axis-panel-body">
+
+          <div class="field">
+            <div class="field-label">
+              <span class="field-label-ja">総歩数</span>
+              <span class="field-label-en">Total Steps</span>
+            </div>
+            <div class="slot-reel" id="reel_stepX">
+              <div class="slot-midline"></div>
+              <div class="reel-hint"><span>▲</span><span>▼</span></div>
+              <div class="slot-strip" id="strip_stepX"></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span class="field-label-ja">等分数</span>
+              <span class="field-label-en">Divisions</span>
+            </div>
+            <div class="stepper">
+              <button class="step-btn step-btn-l" id="btn_dec_splitX">◀</button>
+              <div class="step-val" id="txt_splitX">4</div>
+              <button class="step-btn step-btn-r" id="btn_inc_splitX">▶</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Y軸 -->
+      <div class="axis-panel axis-y">
+        <div class="axis-panel-head">
+          <span class="axis-ja">Y 軸（縦）</span>
+          <span class="axis-en">Vertical</span>
+        </div>
+        <div class="axis-panel-body">
+
+          <div class="field">
+            <div class="field-label">
+              <span class="field-label-ja">総歩数</span>
+              <span class="field-label-en">Total Steps</span>
+            </div>
+            <div class="slot-reel" id="reel_stepY">
+              <div class="slot-midline"></div>
+              <div class="reel-hint"><span>▲</span><span>▼</span></div>
+              <div class="slot-strip" id="strip_stepY"></div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-label">
+              <span class="field-label-ja">等分数</span>
+              <span class="field-label-en">Divisions</span>
+            </div>
+            <div class="stepper">
+              <button class="step-btn step-btn-l" id="btn_dec_splitY">◀</button>
+              <div class="step-val" id="txt_splitY">3</div>
+              <button class="step-btn step-btn-r" id="btn_inc_splitY">▶</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /input-grid -->
+
+    <!-- RESULT -->
+    <div class="result-band">
+      <div class="sec-head" style="margin-bottom:0">
+        <span class="sec-head-ja">計算結果</span>
+        <span class="sec-head-en">Result</span>
+        <div class="sec-rule"></div>
+      </div>
+      <div class="result-grid">
+        <div class="result-box x-box">
+          <div class="result-box-top"></div>
+          <div class="result-label-ja">X（横）1マスあたり</div>
+          <span class="result-label-en">Steps per Cell · X</span>
+          <div class="result-num" id="resultX">—</div>
+          <div class="result-unit">歩 / steps</div>
+        </div>
+        <div class="result-box y-box">
+          <div class="result-box-top"></div>
+          <div class="result-label-ja">Y（縦）1マスあたり</div>
+          <span class="result-label-en">Steps per Cell · Y</span>
+          <div class="result-num" id="resultY">—</div>
+          <div class="result-unit">歩 / steps</div>
+        </div>
+      </div>
+      <div class="ratio-bar">
+        <div class="ratio-badge" id="ratioLabel">X : Y = — : 1</div>
+      </div>
+    </div>
+
+    <!-- VISUALIZE -->
+    <div class="canvas-section">
+      <div class="sec-head" style="margin-bottom:0">
+        <span class="sec-head-ja">マップ表示</span>
+        <span class="sec-head-en">Map Preview</span>
+        <div class="sec-rule"></div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="visualCanvas" width="540" height="540"></canvas>
+      </div>
+    </div>
+
+  </div><!-- /body-card -->
+
+  <div class="footer">Step Scale Simulator v3.0 · Retro Pop Edition</div>
+
+</div><!-- /shell -->
+
+<script>
+const config = {
+  stepX:  { val:25, min:1, max:150 },
+  splitX: { val:4,  min:1, max:20  },
+  stepY:  { val:22, min:1, max:150 },
+  splitY: { val:3,  min:1, max:20  }
+};
+
+const resultXEl    = document.getElementById('resultX');
+const resultYEl    = document.getElementById('resultY');
+const ratioLabelEl = document.getElementById('ratioLabel');
+const canvas       = document.getElementById('visualCanvas');
+const ctx          = canvas.getContext('2d');
+
+const BASE = 540, PL = 68, PB = 48, PT = 22, PR = 22, ITEM_H = 48;
+
+/* ── Slot Reel ─────────────────────────────── */
+function initStepReel(key) {
+  const reel  = document.getElementById(`reel_${key}`);
+  const strip = document.getElementById(`strip_${key}`);
+  const item  = config[key];
+
+  let html = '';
+  for (let i = item.min; i <= item.max; i++)
+    html += `<div class="slot-number">${i}</div>`;
+  strip.innerHTML = html;
+
+  function updatePos(anim = true) {
+    if (!anim) { strip.style.transition = 'none'; }
+    const idx = item.val - item.min;
+    strip.style.transform = `translateY(${-(idx * ITEM_H) + (54/2 - ITEM_H/2)}px)`;
+    if (!anim) { strip.getBoundingClientRect(); strip.style.transition = ''; }
+  }
+
+  reel.addEventListener('wheel', e => {
+    e.preventDefault();
+    item.val = Math.max(item.min, Math.min(item.max, item.val + (e.deltaY > 0 ? -1 : 1)));
+    updatePos(); refresh();
+  }, { passive: false });
+
+  let sy0 = 0, drag = false;
+  reel.addEventListener('mousedown', e => { sy0 = e.clientY; drag = true; });
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    const d = e.clientY - sy0;
+    if (Math.abs(d) > 10) {
+      item.val = Math.max(item.min, Math.min(item.max, item.val + (d > 0 ? -1 : 1)));
+      sy0 = e.clientY; updatePos(); refresh();
+    }
+  });
+  window.addEventListener('mouseup', () => { drag = false; });
+
+  reel.addEventListener('touchstart', e => { sy0 = e.touches[0].clientY; drag = true; }, { passive: true });
+  reel.addEventListener('touchmove', e => {
+    if (!drag) return;
+    if (e.cancelable) e.preventDefault();
+    const d = e.touches[0].clientY - sy0;
+    if (Math.abs(d) > 10) {
+      item.val = Math.max(item.min, Math.min(item.max, item.val + (d > 0 ? -1 : 1)));
+      sy0 = e.touches[0].clientY; updatePos(); refresh();
+    }
+  }, { passive: false });
+  reel.addEventListener('touchend', () => { drag = false; });
+
+  updatePos(false);
+}
+
+/* ── Stepper Buttons ───────────────────────── */
+function initSplitButtons(key) {
+  const item = config[key];
+  const disp = document.getElementById(`txt_${key}`);
+  document.getElementById(`btn_dec_${key}`).addEventListener('click', () => {
+    if (item.val > item.min) { item.val--; disp.textContent = item.val; refresh(); }
+  });
+  document.getElementById(`btn_inc_${key}`).addEventListener('click', () => {
+    if (item.val < item.max) { item.val++; disp.textContent = item.val; refresh(); }
+  });
+}
+
+/* ── Canvas Drawing ────────────────────────── */
+function tx(text, x, y, fill, stroke = '#fff', sw = 3) {
+  if (text == null) return;
+  ctx.strokeStyle = stroke; ctx.lineWidth = sw; ctx.lineJoin = 'round';
+  ctx.strokeText(String(text), x, y);
+  ctx.fillStyle = fill;
+  ctx.fillText(String(text), x, y);
+}
+
+function drawCanvas(stepX, stepY, splitX, splitY) {
+  const maxW = BASE - PL - PR, maxH = BASE - PT - PB;
+  let gw, gh;
+  if (stepX >= stepY) { gw = maxW; gh = maxH * stepY / stepX; }
+  else                { gh = maxH; gw = maxW * stepX / stepY; }
+
+  ctx.clearRect(0, 0, BASE, BASE);
+  const sx = PL, sy = PT + (maxH - gh);
+  const cw = gw / splitX, ch = gh / splitY;
+
+  // チェッカー背景
+  for (let xi = 0; xi < splitX; xi++)
+    for (let yi = 0; yi < splitY; yi++) {
+      ctx.fillStyle = (xi + yi) % 2 === 0 ? '#fff' : '#F0F4FA';
+      ctx.fillRect(sx + xi*cw, sy + yi*ch, cw, ch);
+    }
+
+  // 内部グリッド線
+  ctx.strokeStyle = 'rgba(29,95,168,.25)'; ctx.lineWidth = 1.5;
+  for (let i = 1; i < splitX; i++) {
+    const x = sx + i*cw;
+    ctx.beginPath(); ctx.moveTo(x, sy); ctx.lineTo(x, sy+gh); ctx.stroke();
+  }
+  for (let i = 1; i < splitY; i++) {
+    const y = sy + i*ch;
+    ctx.beginPath(); ctx.moveTo(sx, y); ctx.lineTo(sx+gw, y); ctx.stroke();
+  }
+
+  // 外枠
+  ctx.strokeStyle = '#18181B'; ctx.lineWidth = 4;
+  ctx.strokeRect(sx, sy, gw, gh);
+
+  // マス番号
+  if (splitX <= 15 && splitY <= 15) {
+    const fs = Math.max(9, Math.min(13, Math.min(cw, ch) * 0.21));
+    ctx.font = `600 ${fs}px 'Roboto Mono', monospace`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let xi = 0; xi < splitX; xi++)
+      for (let yi = 0; yi < splitY; yi++) {
+        const px = sx + xi*cw + cw/2;
+        const py = sy + gh - yi*ch - ch/2;
+        tx(`${xi+1},${yi+1}`, px, py, '#18181B', '#fff', 2.5);
+      }
+  }
+
+  // 軸目盛り
+  ctx.font = "700 12px 'Noto Sans JP', sans-serif";
+
+  ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+  tx('0',                       sx,      sy+gh+9,  '#1D5FA8', '#fff', 2);
+  tx(`${stepX.toLocaleString()}歩`, sx+gw,  sy+gh+9,  '#1D5FA8', '#fff', 2);
+  if (splitX >= 2 && gw > 160) {
+    const mid = Math.round(stepX/2);
+    tx(`${mid.toLocaleString()}`, sx+gw/2, sy+gh+9, '#A1A1AA', '#fff', 2);
+  }
+
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  tx('0',                       sx-8, sy+gh, '#1D5FA8', '#fff', 2);
+  tx(`${stepY.toLocaleString()}歩`, sx-8, sy,    '#1D5FA8', '#fff', 2);
+
+  // 軸矢印
+  ctx.fillStyle = '#1D5FA8';
+  ctx.beginPath(); ctx.moveTo(sx+gw+12,sy+gh); ctx.lineTo(sx+gw+6,sy+gh-4); ctx.lineTo(sx+gw+6,sy+gh+4); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(sx,sy-12); ctx.lineTo(sx-4,sy-6); ctx.lineTo(sx+4,sy-6); ctx.closePath(); ctx.fill();
+}
+
+/* ── Refresh ───────────────────────────────── */
+function pop(el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+
+function refresh() {
+  const { stepX:{val:sx}, splitX:{val:spx}, stepY:{val:sy}, splitY:{val:spy} } = config;
+  const ratio = Math.round(sx/sy*100)/100;
+  ratioLabelEl.textContent = `X : Y = ${ratio} : 1`;
+  const rx = Math.round(sx/spx*10)/10;
+  const ry = Math.round(sy/spy*10)/10;
+  resultXEl.textContent = rx.toLocaleString();
+  resultYEl.textContent = ry.toLocaleString();
+  pop(resultXEl); pop(resultYEl);
+  drawCanvas(sx, sy, spx, spy);
+}
+
+/* ── Init ──────────────────────────────────── */
+initStepReel('stepX');
+initStepReel('stepY');
+initSplitButtons('splitX');
+initSplitButtons('splitY');
+refresh();
+</script>
+</body>
+</html>
