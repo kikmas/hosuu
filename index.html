@@ -236,17 +236,24 @@ canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border
 .cam-body { background:var(--white); border:var(--border); border-top:0; border-radius:0 0 var(--r-lg) var(--r-lg); box-shadow:var(--shadow); overflow:hidden; }
 
 .cam-viewport {
-  position:relative; width:100%; background:#000;
+  position:relative; width:100%; background:#111;
   overflow:hidden;
+  height: 56vw;
+  min-height: 320px;
+  max-height: 72vh;
 }
 .cam-viewport video {
-  width:100%; display:block;
+  position:absolute; top:0; left:0;
+  width:100%; height:100%;
+  display:block;
   object-fit:cover;
+  z-index:1;
 }
 .cam-viewport canvas#overlayCanvas {
   position:absolute; top:0; left:0;
   width:100%; height:100%;
   pointer-events:none;
+  z-index:2;
 }
 /* タッチ操作レイヤー */
 .cam-touch-layer {
@@ -864,34 +871,57 @@ slLine.addEventListener('input', () => {
 async function initCamera() {
   if (camRunning) return;
   try {
-    videoStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} },
-      audio: false
-    });
-    video.srcObject = videoStream;
-    video.play();
+    // Android では environment を先に試み、失敗したら any で再試行
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: 'environment' } }, audio: false
+      });
+    } catch(_) {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: true, audio: false
+      });
+    }
+    videoStream = stream;
+    video.srcObject = stream;
     camRunning = true;
 
+    // Android は play() を明示的に await する
+    await video.play().catch(() => {});
+
+    // loadedmetadata + 念押しで 300ms 後にもリサイズ
     video.addEventListener('loadedmetadata', () => {
       resizeOverlayCanvas();
+      setTimeout(resizeOverlayCanvas, 300);
     });
     video.addEventListener('resize', resizeOverlayCanvas);
     window.addEventListener('resize', resizeOverlayCanvas);
 
+    // すでにメタデータが来ていた場合の保険
+    if (video.readyState >= 1) {
+      resizeOverlayCanvas();
+      setTimeout(resizeOverlayCanvas, 300);
+    }
+
     requestAnimationFrame(renderLoop);
   } catch(e) {
+    console.error('Camera error:', e);
     document.getElementById('camUnavail').classList.add('show');
-    video.style.display = 'none';
   }
 }
 
 function resizeOverlayCanvas() {
+  // viewportのBCRを使うが、videoの実際の表示サイズを優先
   const vp = viewport.getBoundingClientRect();
-  overlayC.width  = vp.width;
-  overlayC.height = vp.height;
+  const w  = vp.width  || video.offsetWidth  || 360;
+  const h  = vp.height || video.offsetHeight || 320;
+  overlayC.width  = w;
+  overlayC.height = h;
   // 初期位置：中央
-  ov.x = overlayC.width  / 2;
-  ov.y = overlayC.height / 2;
+  if (ov.x === 0 && ov.y === 0) {
+    ov.x = w / 2;
+    ov.y = h / 2;
+  }
   drawOverlay();
 }
 
