@@ -3,31 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>歩数分割スケール シミュレーター v4</title>
+<title>歩数分割スケール シミュレーター v5</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Oswald:wght@600;700&family=Roboto+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
-/* ─── Tokens ─────────────────────────────────── */
 :root {
-  --red:     #E3350D;
-  --blue:    #1D5FA8;
-  --blue-lt: #EBF2FB;
-  --yellow:  #FFCB05;
-  --dark:    #18181B;
-  --mid:     #52525B;
-  --muted:   #A1A1AA;
-  --bg:      #F4F5F7;
-  --white:   #FFFFFF;
-  --purple:  #6D28D9;
-  --green:   #059669;
-  --border:  3px solid #18181B;
-  --f-disp:  'Oswald','Noto Sans JP',sans-serif;
-  --f-body:  'Noto Sans JP',sans-serif;
-  --f-mono:  'Roboto Mono',monospace;
-  --r-lg: 16px; --r-md: 10px; --r-sm: 6px;
+  --red:    #E3350D;
+  --blue:   #1D5FA8;
+  --yellow: #FFCB05;
+  --dark:   #18181B;
+  --mid:    #52525B;
+  --muted:  #A1A1AA;
+  --bg:     #F4F5F7;
+  --white:  #FFFFFF;
+  --purple: #6D28D9;
+  --green:  #059669;
+  --border: 3px solid #18181B;
+  --f-disp: 'Oswald','Noto Sans JP',sans-serif;
+  --f-body: 'Noto Sans JP',sans-serif;
+  --f-mono: 'Roboto Mono',monospace;
+  --r-lg:16px; --r-md:10px; --r-sm:6px;
   --shadow: 4px 4px 0 #18181B;
 }
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0;
-  -webkit-user-select:none; user-select:none; }
+*,*::before,*::after {
+  box-sizing:border-box; margin:0; padding:0;
+  -webkit-user-select:none; user-select:none;
+}
 body {
   font-family:var(--f-body);
   background:var(--dark); color:var(--dark);
@@ -42,7 +42,7 @@ body {
 }
 .shell { width:100%; max-width:580px; }
 
-/* ─── Tab bar ────────────────────────────────── */
+/* ── Tab ── */
 .tab-bar {
   display:grid; grid-template-columns:1fr 1fr;
   border:var(--border); border-radius:var(--r-lg) var(--r-lg) 0 0;
@@ -57,36 +57,26 @@ body {
   position:relative;
 }
 .tab-btn:last-child { border-right:none; }
-.tab-btn.active { background:var(--red); }
-.tab-btn.active.cam-tab { background:var(--blue); }
-.tab-btn .tab-icon { font-size:1.2rem; line-height:1; }
-.tab-btn .tab-ja {
-  font-family:var(--f-body); font-weight:900; font-size:.72rem;
-  color:#fff; letter-spacing:.06em;
-}
-.tab-btn .tab-en {
-  font-family:var(--f-disp); font-size:.58rem; font-weight:600;
-  letter-spacing:.14em; color:rgba(255,255,255,.6); text-transform:uppercase;
-}
-.tab-indicator {
-  position:absolute; bottom:0; left:0; right:0; height:3px;
-  background:var(--yellow);
-  display:none;
-}
+.tab-btn.active     { background:var(--red); }
+.tab-btn.active.preview-tab { background:var(--blue); }
+.tab-icon { font-size:1.2rem; line-height:1; }
+.tab-ja { font-family:var(--f-body); font-weight:900; font-size:.72rem; color:#fff; letter-spacing:.06em; }
+.tab-en { font-family:var(--f-disp); font-size:.58rem; font-weight:600; letter-spacing:.14em; color:rgba(255,255,255,.6); text-transform:uppercase; }
+.tab-indicator { position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--yellow); display:none; }
 .tab-btn.active .tab-indicator { display:block; }
 
-/* ─── Panels ─────────────────────────────────── */
+/* ── Panel ── */
 .panel { display:none; }
 .panel.active { display:block; }
 
-/* ─── Header (shared) ────────────────────────── */
+/* ── Header ── */
 .header {
-  background:var(--red);
   border:var(--border); border-top:0;
   padding:18px 22px 16px;
   position:relative; overflow:hidden;
 }
-.header.cam-header { background:var(--blue); }
+.header.sim-hd { background:var(--red); }
+.header.pre-hd { background:var(--blue); }
 .header::after {
   content:''; position:absolute; inset:0;
   background:repeating-linear-gradient(-45deg,transparent,transparent 6px,rgba(0,0,0,.04) 6px,rgba(0,0,0,.04) 12px);
@@ -101,7 +91,7 @@ body {
 }
 .header-titles { flex:1; }
 .header-ja { font-family:var(--f-body); font-weight:900; font-size:1rem; color:#fff; letter-spacing:.06em; }
-.header-en { font-family:var(--f-disp); font-size:1.35rem; font-weight:700; color:var(--yellow); letter-spacing:.12em; text-transform:uppercase; }
+.header-en { font-family:var(--f-disp); font-size:1.3rem; font-weight:700; color:var(--yellow); letter-spacing:.12em; text-transform:uppercase; }
 .version-chip {
   flex-shrink:0; font-family:var(--f-mono); font-size:.62rem; font-weight:600;
   background:rgba(255,255,255,.15); color:#fff;
@@ -109,25 +99,25 @@ body {
   padding:3px 11px; letter-spacing:.08em;
 }
 
-/* ─── Body card ──────────────────────────────── */
+/* ── Body card ── */
 .body-card {
   background:var(--white); border:var(--border); border-top:0;
   border-radius:0 0 var(--r-lg) var(--r-lg);
   padding:22px 18px 26px; box-shadow:var(--shadow);
 }
 
-/* ─── Section head ───────────────────────────── */
+/* ── Section head ── */
 .sec-head { display:flex; align-items:baseline; gap:8px; margin-bottom:14px; }
 .sec-head-ja { font-family:var(--f-body); font-weight:900; font-size:.8rem; color:var(--dark); letter-spacing:.08em; }
 .sec-head-en { font-family:var(--f-disp); font-size:.68rem; font-weight:600; color:var(--muted); letter-spacing:.15em; text-transform:uppercase; }
 .sec-rule { flex:1; height:2px; background:linear-gradient(to right,var(--dark),transparent); border-radius:2px; }
 
-/* ─── Input grid ─────────────────────────────── */
+/* ── Input grid ── */
 .input-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px; }
 .axis-panel { border:var(--border); border-radius:var(--r-md); overflow:hidden; }
 .axis-panel-head { padding:8px 14px; display:flex; align-items:center; justify-content:space-between; }
-.axis-ja { font-family:var(--f-body); font-weight:900; font-size:.8rem; color:#fff; letter-spacing:.06em; }
-.axis-en { font-family:var(--f-disp); font-size:.62rem; font-weight:600; letter-spacing:.14em; color:rgba(255,255,255,.65); text-transform:uppercase; }
+.axis-ja-sm { font-family:var(--f-body); font-weight:900; font-size:.8rem; color:#fff; letter-spacing:.06em; }
+.axis-en-sm { font-family:var(--f-disp); font-size:.62rem; font-weight:600; letter-spacing:.14em; color:rgba(255,255,255,.65); text-transform:uppercase; }
 .axis-x .axis-panel-head { background:var(--blue); }
 .axis-y .axis-panel-head { background:var(--purple); }
 .axis-panel-body { padding:14px 12px 12px; background:var(--bg); display:flex; flex-direction:column; gap:14px; }
@@ -136,7 +126,7 @@ body {
 .field-label-ja { font-family:var(--f-body); font-weight:700; font-size:.7rem; color:var(--mid); }
 .field-label-en { font-family:var(--f-disp); font-size:.6rem; font-weight:600; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
 
-/* ─── Slot reel ──────────────────────────────── */
+/* ── Slot reel ── */
 .slot-reel {
   width:100%; height:54px; background:var(--white);
   border:var(--border); border-radius:var(--r-sm);
@@ -145,19 +135,16 @@ body {
   box-shadow:inset 0 6px 12px rgba(0,0,0,.10),inset 0 -6px 12px rgba(0,0,0,.10);
 }
 .slot-reel::before,.slot-reel::after {
-  content:''; position:absolute; left:0; width:100%; height:18px;
-  z-index:2; pointer-events:none;
+  content:''; position:absolute; left:0; width:100%; height:18px; z-index:2; pointer-events:none;
 }
 .slot-reel::before { top:0;    background:linear-gradient(to bottom,rgba(0,0,0,.22),transparent); }
-.slot-reel::after  { bottom:0; background:linear-gradient(to top,   rgba(0,0,0,.22),transparent); }
+.slot-reel::after  { bottom:0; background:linear-gradient(to top,rgba(0,0,0,.22),transparent); }
 .slot-midline {
   position:absolute; top:50%; left:0; right:0; height:2px;
-  background:rgba(29,95,168,.18); transform:translateY(-50%);
-  z-index:3; pointer-events:none;
+  background:rgba(29,95,168,.18); transform:translateY(-50%); z-index:3; pointer-events:none;
 }
 .slot-strip {
-  position:absolute; width:100%; top:0; left:0;
-  display:flex; flex-direction:column;
+  position:absolute; width:100%; top:0; left:0; display:flex; flex-direction:column;
   transition:transform .09s cubic-bezier(.25,.8,.25,1); pointer-events:none;
 }
 .slot-number {
@@ -171,7 +158,7 @@ body {
 }
 .reel-hint span { font-size:.5rem; color:var(--dark); line-height:1; display:block; }
 
-/* ─── Stepper ────────────────────────────────── */
+/* ── Stepper ── */
 .stepper { display:flex; align-items:center; background:var(--white); border:var(--border); border-radius:var(--r-sm); overflow:hidden; height:42px; }
 .step-btn {
   width:40px; height:100%; flex-shrink:0; background:#EBEBEB; border:none; cursor:pointer;
@@ -185,7 +172,7 @@ body {
 .step-btn-r { border-left: 2px solid var(--dark); }
 .step-val { flex:1; text-align:center; font-family:var(--f-mono); font-size:1.15rem; font-weight:600; color:var(--dark); }
 
-/* ─── Result band ────────────────────────────── */
+/* ── Result band ── */
 .result-band {
   background:var(--yellow); border:var(--border); border-radius:var(--r-md);
   padding:18px 16px 14px; margin-bottom:22px;
@@ -201,7 +188,7 @@ body {
 .result-box-top { position:absolute; top:0; left:0; right:0; height:4px; }
 .result-box.x-box .result-box-top { background:var(--blue); }
 .result-box.y-box .result-box-top { background:var(--purple); }
-.result-label-ja { font-family:var(--f-body); font-size:.68rem; font-weight:700; color:var(--mid); letter-spacing:.04em; margin-bottom:2px; }
+.result-label-ja { font-family:var(--f-body); font-size:.68rem; font-weight:700; color:var(--mid); margin-bottom:2px; }
 .result-label-en { font-family:var(--f-disp); font-size:.58rem; font-weight:600; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; display:block; }
 .result-num { font-family:var(--f-mono); font-size:1.8rem; font-weight:600; color:var(--red); line-height:1; }
 .result-unit { font-family:var(--f-body); font-size:.72rem; font-weight:700; color:var(--muted); margin-top:4px; }
@@ -209,87 +196,128 @@ body {
 .ratio-badge {
   background:var(--dark); color:var(--yellow); border:2px solid var(--dark); border-radius:50px;
   padding:5px 20px; font-family:var(--f-mono); font-size:.75rem; font-weight:600; letter-spacing:.08em;
-  box-shadow:2px 2px 0 rgba(0,0,0,.25);
 }
 
-/* ─── Canvas section ─────────────────────────── */
+/* ── Main canvas ── */
 .canvas-section { background:var(--bg); border:var(--border); border-radius:var(--r-md); padding:16px; }
 .canvas-wrap { width:100%; max-width:490px; margin:14px auto 0; }
 canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border); border-radius:var(--r-sm); background:#fff; }
 
-/* ─── Camera panel ───────────────────────────── */
-/* 図面確認ボタン */
-.cam-launch-btn {
+/* ── 図面確認へボタン ── */
+.to-preview-btn {
   width:100%; margin-top:18px;
   background:var(--blue); color:#fff;
   border:var(--border); border-radius:var(--r-md);
   padding:16px; cursor:pointer;
   display:flex; align-items:center; justify-content:center; gap:10px;
-  box-shadow:var(--shadow);
-  transition:transform .1s,box-shadow .1s;
+  box-shadow:var(--shadow); transition:transform .1s,box-shadow .1s;
 }
-.cam-launch-btn:active { transform:translate(2px,2px); box-shadow:2px 2px 0 var(--dark); }
-.cam-launch-btn .btn-ja { font-family:var(--f-body); font-weight:900; font-size:.95rem; letter-spacing:.06em; }
-.cam-launch-btn .btn-en { font-family:var(--f-disp); font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.7); }
+.to-preview-btn:active { transform:translate(2px,2px); box-shadow:2px 2px 0 var(--dark); }
+.to-preview-btn .btn-ja { font-family:var(--f-body); font-weight:900; font-size:.95rem; letter-spacing:.06em; }
+.to-preview-btn .btn-en { font-family:var(--f-disp); font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.7); }
 
-/* カメラビュー */
-.cam-body { background:var(--white); border:var(--border); border-top:0; border-radius:0 0 var(--r-lg) var(--r-lg); box-shadow:var(--shadow); overflow:hidden; }
-
-.cam-viewport {
-  position:relative; width:100%; background:#111;
-  overflow:hidden;
-  height: 56vw;
-  min-height: 320px;
-  max-height: 72vh;
-}
-.cam-viewport video {
-  position:absolute; top:0; left:0;
-  width:100%; height:100%;
-  display:block;
-  object-fit:cover;
-  z-index:1;
-}
-.cam-viewport canvas#overlayCanvas {
-  position:absolute; top:0; left:0;
-  width:100%; height:100%;
-  pointer-events:none;
-  z-index:2;
-}
-/* タッチ操作レイヤー */
-.cam-touch-layer {
-  position:absolute; top:0; left:0; width:100%; height:100%;
-  z-index:10; cursor:move;
-  touch-action:none;
+/* ════════════════════════════════
+   PANEL B — 図面確認
+════════════════════════════════ */
+.pre-body {
+  background:var(--white); border:var(--border); border-top:0;
+  border-radius:0 0 var(--r-lg) var(--r-lg);
+  overflow:hidden; box-shadow:var(--shadow);
 }
 
-/* ロック中オーバーレイ */
-.lock-overlay {
+/* ── 画像選択エリア ── */
+.img-drop-area {
+  margin:18px 18px 0;
+  border:3px dashed #A1A1AA;
+  border-radius:var(--r-md);
+  background:#F9FAFB;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; padding:28px 16px; cursor:pointer;
+  transition:border-color .2s, background .2s;
+  position:relative;
+}
+.img-drop-area.has-image {
+  border-style:solid; border-color:var(--blue);
+  background:#EBF2FB; padding:12px;
+}
+.img-drop-area:active { background:#E0EAFA; }
+.drop-icon { font-size:2rem; line-height:1; }
+.drop-ja { font-family:var(--f-body); font-weight:900; font-size:.9rem; color:var(--dark); letter-spacing:.04em; }
+.drop-en { font-family:var(--f-disp); font-size:.68rem; font-weight:600; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; }
+.drop-sub { font-family:var(--f-body); font-size:.68rem; color:var(--muted); }
+/* ファイルinputは非表示 */
+#fileInput { position:absolute; inset:0; opacity:0; cursor:pointer; -webkit-user-select:auto; user-select:auto; }
+
+/* 選択済み画像サムネ */
+.img-thumb {
   display:none;
-  position:absolute; top:0; left:0; width:100%; height:100%;
-  background:transparent; z-index:20; cursor:not-allowed;
+  width:100%; border-radius:var(--r-sm);
+  border:2px solid var(--blue);
+  object-fit:contain; max-height:120px;
 }
-.lock-overlay.active { display:block; }
+.img-drop-area.has-image .img-thumb { display:block; }
+.img-drop-area.has-image .drop-icon,
+.img-drop-area.has-image .drop-ja,
+.img-drop-area.has-image .drop-en,
+.img-drop-area.has-image .drop-sub { display:none; }
+.img-change-label {
+  display:none;
+  font-family:var(--f-body); font-size:.72rem; font-weight:700;
+  color:var(--blue); margin-top:6px; text-align:center;
+}
+.img-drop-area.has-image .img-change-label { display:block; }
 
+/* ── ビューポート（画像＋SVGオーバーレイ） ── */
+.pre-viewport {
+  position:relative; width:100%; background:#222;
+  overflow:hidden;
+  margin-top:14px;
+  /* 画像が読み込まれたら高さは自動 */
+  min-height:0;
+}
+.pre-viewport.ready { min-height:200px; }
+.pre-bg-img {
+  display:block; width:100%; height:auto;
+  object-fit:contain;
+  position:relative; z-index:1;
+  /* タッチによる長押しメニュー抑制 */
+  -webkit-touch-callout:none;
+  pointer-events:none;
+}
+#overlaySVG {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  z-index:2; pointer-events:none; overflow:visible;
+}
+.pre-touch-layer {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  z-index:3; cursor:move; touch-action:none;
+}
 /* ロックバナー */
 .lock-banner {
-  display:none;
-  position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  display:none; position:absolute; top:10px; left:50%; transform:translateX(-50%);
   background:rgba(0,0,0,.65); color:var(--yellow);
   border:2px solid var(--yellow); border-radius:50px;
-  padding:5px 18px;
-  font-family:var(--f-mono); font-size:.7rem; font-weight:600; letter-spacing:.1em;
-  z-index:30; white-space:nowrap;
+  padding:5px 18px; font-family:var(--f-mono); font-size:.7rem; font-weight:600;
+  z-index:10; white-space:nowrap;
 }
 .lock-banner.active { display:block; }
 
-/* コントロールパネル */
-.cam-controls {
-  padding:16px 16px 10px;
-  background:var(--bg);
+/* 画像未選択プレースホルダー */
+.pre-placeholder {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; padding:48px 20px;
+  color:rgba(255,255,255,.3);
+}
+.pre-placeholder .ph-icon { font-size:2.5rem; opacity:.4; }
+.pre-placeholder p { font-family:var(--f-body); font-size:.82rem; letter-spacing:.04em; }
+
+/* ── スライダー ── */
+.pre-controls {
+  padding:16px 18px 10px; background:var(--bg);
   border-top:2px solid #E4E4E7;
   display:flex; flex-direction:column; gap:10px;
 }
-.ctrl-row { display:grid; grid-template-columns:80px 1fr; align-items:center; gap:10px; }
+.ctrl-row { display:grid; grid-template-columns:72px 1fr 44px; align-items:center; gap:8px; }
 .ctrl-label { display:flex; flex-direction:column; }
 .ctrl-label-ja { font-family:var(--f-body); font-weight:700; font-size:.72rem; color:var(--mid); }
 .ctrl-label-en { font-family:var(--f-disp); font-size:.58rem; font-weight:600; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; }
@@ -299,67 +327,47 @@ canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border
   background:#D4D4D8; outline:none; cursor:pointer;
 }
 .ctrl-slider::-webkit-slider-thumb {
-  -webkit-appearance:none; appearance:none;
-  width:22px; height:22px; border-radius:50%;
+  -webkit-appearance:none; width:22px; height:22px; border-radius:50%;
   background:var(--blue); border:3px solid var(--dark); cursor:pointer;
-  box-shadow:2px 2px 0 rgba(0,0,0,.2);
 }
-.ctrl-val {
-  font-family:var(--f-mono); font-size:.72rem; font-weight:600;
-  color:var(--dark); min-width:40px; text-align:right;
-}
-.ctrl-row-with-val { display:grid; grid-template-columns:80px 1fr 44px; align-items:center; gap:8px; }
+.ctrl-val { font-family:var(--f-mono); font-size:.72rem; font-weight:600; color:var(--dark); text-align:right; }
 
-/* ボタン群 */
-.cam-btn-row {
+/* ── アクションボタン ── */
+.pre-btn-row {
   display:grid; grid-template-columns:1fr 1fr 1fr;
-  gap:10px; padding:12px 16px 18px;
-  background:var(--white);
-  border-top:2px solid #E4E4E7;
+  gap:10px; padding:12px 18px 18px;
+  background:var(--white); border-top:2px solid #E4E4E7;
 }
-.cam-btn {
+.pre-btn {
   border:var(--border); border-radius:var(--r-sm);
   padding:11px 6px; cursor:pointer;
   display:flex; flex-direction:column; align-items:center; gap:4px;
   box-shadow:var(--shadow); transition:transform .1s,box-shadow .1s;
-  font-size:inherit;
 }
-.cam-btn:active { transform:translate(2px,2px); box-shadow:2px 2px 0 var(--dark); }
-.cam-btn .b-icon { font-size:1.1rem; line-height:1; }
-.cam-btn .b-ja { font-family:var(--f-body); font-weight:900; font-size:.68rem; color:#fff; letter-spacing:.04em; }
-.cam-btn .b-en { font-family:var(--f-disp); font-size:.55rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.65); }
-.btn-lock   { background:#52525B; }
-.btn-save   { background:var(--green); }
-.btn-reset  { background:var(--mid); }
+.pre-btn:active { transform:translate(2px,2px); box-shadow:2px 2px 0 var(--dark); }
+.pre-btn .b-icon { font-size:1.1rem; line-height:1; }
+.pre-btn .b-ja { font-family:var(--f-body); font-weight:900; font-size:.68rem; color:#fff; letter-spacing:.04em; }
+.pre-btn .b-en { font-family:var(--f-disp); font-size:.55rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.65); }
+.btn-lock  { background:#52525B; }
+.btn-save  { background:var(--green); }
+.btn-reset { background:var(--mid); }
 
-/* カメラ未対応メッセージ */
-.cam-unavail {
-  padding:40px 20px; text-align:center;
-  display:none; flex-direction:column; align-items:center; gap:12px;
-}
-.cam-unavail.show { display:flex; }
-.cam-unavail .icon { font-size:2.5rem; }
-.cam-unavail p { font-family:var(--f-body); font-size:.85rem; color:var(--mid); line-height:1.7; }
-.cam-unavail small { font-family:var(--f-mono); font-size:.65rem; color:var(--muted); }
-
-/* 保存完了トースト */
+/* ── Toast ── */
 .toast {
   position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(80px);
   background:var(--green); color:#fff;
   border:var(--border); border-radius:50px;
-  padding:10px 24px;
-  font-family:var(--f-body); font-weight:700; font-size:.85rem; letter-spacing:.04em;
-  box-shadow:var(--shadow);
-  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  padding:10px 24px; font-family:var(--f-body); font-weight:700; font-size:.85rem;
+  box-shadow:var(--shadow); transition:transform .3s cubic-bezier(.34,1.56,.64,1);
   z-index:9999; white-space:nowrap;
 }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
-/* ─── Animations ─────────────────────────────── */
+/* ── Animations ── */
 @keyframes numPop { 0%{transform:scale(1)} 35%{transform:scale(1.12)} 100%{transform:scale(1)} }
 .result-num.pop { animation:numPop .2s ease-out; }
 
-/* ─── Footer ─────────────────────────────────── */
+/* ── Footer ── */
 .footer { text-align:center; margin-top:20px; font-family:var(--f-disp); font-size:.58rem; letter-spacing:.18em; color:rgba(255,255,255,.22); text-transform:uppercase; }
 </style>
 </head>
@@ -375,30 +383,26 @@ canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border
       <span class="tab-en">Grid Settings</span>
       <div class="tab-indicator"></div>
     </button>
-    <button class="tab-btn cam-tab" id="tab-cam" onclick="switchTab('cam')">
-      <span class="tab-icon">📷</span>
+    <button class="tab-btn preview-tab" id="tab-pre" onclick="switchTab('pre')">
+      <span class="tab-icon">🗺️</span>
       <span class="tab-ja">図面確認</span>
       <span class="tab-en">Map Preview</span>
       <div class="tab-indicator"></div>
     </button>
   </div>
 
-  <!-- ══════════════════════════════════════════ -->
-  <!-- PANEL A : グリッド設定                    -->
-  <!-- ══════════════════════════════════════════ -->
+  <!-- ══════════ PANEL A：グリッド設定 ══════════ -->
   <div class="panel active" id="panel-sim">
-
-    <div class="header">
+    <div class="header sim-hd">
       <div class="header-inner">
         <div class="header-icon">⊞</div>
         <div class="header-titles">
           <div class="header-ja">歩数分割スケール シミュレーター</div>
           <div class="header-en">Step Scale Simulator</div>
         </div>
-        <div class="version-chip">v4.0</div>
+        <div class="version-chip">v5.0</div>
       </div>
     </div>
-
     <div class="body-card">
 
       <div class="sec-head">
@@ -411,8 +415,8 @@ canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border
         <!-- X -->
         <div class="axis-panel axis-x">
           <div class="axis-panel-head">
-            <span class="axis-ja">X 軸（横）</span>
-            <span class="axis-en">Horizontal</span>
+            <span class="axis-ja-sm">X 軸（横）</span>
+            <span class="axis-en-sm">Horizontal</span>
           </div>
           <div class="axis-panel-body">
             <div class="field">
@@ -442,8 +446,8 @@ canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border
         <!-- Y -->
         <div class="axis-panel axis-y">
           <div class="axis-panel-head">
-            <span class="axis-ja">Y 軸（縦）</span>
-            <span class="axis-en">Vertical</span>
+            <span class="axis-ja-sm">Y 軸（縦）</span>
+            <span class="axis-en-sm">Vertical</span>
           </div>
           <div class="axis-panel-body">
             <div class="field">
@@ -512,66 +516,68 @@ canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border
         </div>
       </div>
 
-      <!-- 図面確認モードへのボタン -->
-      <button class="cam-launch-btn" onclick="switchTab('cam')">
-        <span style="font-size:1.3rem">📷</span>
+      <!-- 図面確認へ -->
+      <button class="to-preview-btn" onclick="switchTab('pre')">
+        <span style="font-size:1.3rem">🗺️</span>
         <div>
           <div class="btn-ja">図面確認モードへ</div>
-          <div class="btn-en">Open Map Preview Camera</div>
+          <div class="btn-en">Open Map Preview</div>
         </div>
-        <span style="font-size:1rem; margin-left:auto; color:rgba(255,255,255,.6)">▶</span>
+        <span style="font-size:1rem;margin-left:auto;color:rgba(255,255,255,.6)">▶</span>
       </button>
 
     </div>
-  </div><!-- /panel-sim -->
+  </div>
 
-  <!-- ══════════════════════════════════════════ -->
-  <!-- PANEL B : 図面確認（カメラ）              -->
-  <!-- ══════════════════════════════════════════ -->
-  <div class="panel" id="panel-cam">
-
-    <div class="header cam-header">
+  <!-- ══════════ PANEL B：図面確認 ══════════ -->
+  <div class="panel" id="panel-pre">
+    <div class="header pre-hd">
       <div class="header-inner">
-        <div class="header-icon">📷</div>
+        <div class="header-icon">🗺️</div>
         <div class="header-titles">
           <div class="header-ja">図面確認モード</div>
-          <div class="header-en">Map Preview Camera</div>
+          <div class="header-en">Map Preview</div>
         </div>
-        <div class="version-chip">v4.0</div>
+        <div class="version-chip">v5.0</div>
       </div>
     </div>
 
-    <div class="cam-body">
+    <div class="pre-body">
+
+      <!-- 画像選択 -->
+      <div class="img-drop-area" id="imgDropArea">
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+        <span class="drop-icon">📁</span>
+        <div class="drop-ja">図面を選択 / カメラで撮影</div>
+        <div class="drop-en">Select drawing or take photo</div>
+        <div class="drop-sub">JPEG・PNG・対応画像</div>
+        <img class="img-thumb" id="imgThumb" src="" alt="選択画像">
+        <div class="img-change-label">タップして画像を変更 / Tap to change</div>
+      </div>
 
       <!-- ビューポート -->
-      <div class="cam-viewport" id="camViewport">
-        <video id="camVideo" autoplay playsinline muted></video>
-        <canvas id="overlayCanvas"></canvas>
-        <div class="cam-touch-layer" id="camTouchLayer"></div>
-        <div class="lock-overlay" id="lockOverlay"></div>
+      <div class="pre-viewport" id="preViewport">
+        <div class="pre-placeholder" id="prePlaceholder">
+          <span class="ph-icon">🗺️</span>
+          <p>図面を選択するとここに表示されます</p>
+        </div>
+        <img class="pre-bg-img" id="preBgImg" src="" alt="図面" style="display:none">
+        <svg id="overlaySVG" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="pre-touch-layer" id="preTouchLayer"></div>
         <div class="lock-banner" id="lockBanner">🔒 LOCKED</div>
       </div>
 
-      <!-- カメラ未対応 -->
-      <div class="cam-unavail" id="camUnavail">
-        <span class="icon">📵</span>
-        <p>カメラを起動できませんでした。<br>HTTPS環境でご使用ください。<br>Camera is not available.<br>Please use HTTPS.</p>
-        <small>navigator.mediaDevices.getUserMedia required</small>
-      </div>
-
-      <!-- スライダー群 -->
-      <div class="cam-controls">
-
-        <div class="ctrl-row-with-val">
+      <!-- スライダー -->
+      <div class="pre-controls">
+        <div class="ctrl-row">
           <div class="ctrl-label">
             <span class="ctrl-label-ja">縮尺</span>
             <span class="ctrl-label-en">Scale</span>
           </div>
-          <input type="range" class="ctrl-slider" id="slScale" min="20" max="200" value="80">
+          <input type="range" class="ctrl-slider" id="slScale" min="10" max="200" value="80">
           <span class="ctrl-val" id="valScale">80%</span>
         </div>
-
-        <div class="ctrl-row-with-val">
+        <div class="ctrl-row">
           <div class="ctrl-label">
             <span class="ctrl-label-ja">回転</span>
             <span class="ctrl-label-en">Rotation</span>
@@ -579,8 +585,7 @@ canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border
           <input type="range" class="ctrl-slider" id="slRotate" min="-180" max="180" value="0">
           <span class="ctrl-val" id="valRotate">0°</span>
         </div>
-
-        <div class="ctrl-row-with-val">
+        <div class="ctrl-row">
           <div class="ctrl-label">
             <span class="ctrl-label-ja">透明度</span>
             <span class="ctrl-label-en">Opacity</span>
@@ -588,79 +593,73 @@ canvas.main-canvas { width:100%; height:auto; display:block; border:var(--border
           <input type="range" class="ctrl-slider" id="slOpacity" min="10" max="100" value="60">
           <span class="ctrl-val" id="valOpacity">60%</span>
         </div>
-
-        <div class="ctrl-row-with-val">
+        <div class="ctrl-row">
           <div class="ctrl-label">
             <span class="ctrl-label-ja">線の太さ</span>
             <span class="ctrl-label-en">Line Width</span>
           </div>
-          <input type="range" class="ctrl-slider" id="slLine" min="1" max="8" value="2">
+          <input type="range" class="ctrl-slider" id="slLine" min="1" max="10" value="2">
           <span class="ctrl-val" id="valLine">2px</span>
         </div>
-
       </div>
 
-      <!-- アクションボタン -->
-      <div class="cam-btn-row">
-        <button class="cam-btn btn-lock" id="btnLock" onclick="toggleLock()">
+      <!-- ボタン -->
+      <div class="pre-btn-row">
+        <button class="pre-btn btn-lock" id="btnLock" onclick="toggleLock()">
           <span class="b-icon">🔓</span>
           <span class="b-ja">ロック</span>
           <span class="b-en">Lock</span>
         </button>
-        <button class="cam-btn btn-save" onclick="saveImage()">
+        <button class="pre-btn btn-save" onclick="saveImage()">
           <span class="b-icon">💾</span>
           <span class="b-ja">画像保存</span>
           <span class="b-en">Save Image</span>
         </button>
-        <button class="cam-btn btn-reset" onclick="resetOverlay()">
+        <button class="pre-btn btn-reset" onclick="resetOverlay()">
           <span class="b-icon">↺</span>
           <span class="b-ja">リセット</span>
           <span class="b-en">Reset</span>
         </button>
       </div>
 
-    </div><!-- /cam-body -->
-  </div><!-- /panel-cam -->
+    </div>
+  </div>
 
-  <div class="footer">Step Scale Simulator v4.0 · Map Preview Edition</div>
-</div><!-- /shell -->
+  <div class="footer">Step Scale Simulator v5.0 · Map Preview Edition</div>
+</div>
 
-<!-- トースト -->
 <div class="toast" id="toast">✅ 画像を保存しました / Image Saved</div>
 
 <script>
-/* ════════════════════════════════════════════════
+/* ════════════════════════════
    CONFIG
-════════════════════════════════════════════════ */
+════════════════════════════ */
 const config = {
   stepX:  { val:25, min:1, max:150 },
   splitX: { val:4,  min:1, max:20  },
   stepY:  { val:22, min:1, max:150 },
-  stepY2: null,
   splitY: { val:3,  min:1, max:20  }
 };
 
-/* ════════════════════════════════════════════════
-   TAB SWITCH
-════════════════════════════════════════════════ */
+/* ════════════════════════════
+   TAB
+════════════════════════════ */
 function switchTab(t) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + t).classList.add('active');
   document.getElementById('panel-' + t).classList.add('active');
-  if (t === 'cam') initCamera();
 }
 
-/* ════════════════════════════════════════════════
+/* ════════════════════════════
    PANEL A — Grid Simulator
-════════════════════════════════════════════════ */
+════════════════════════════ */
 const resultXEl    = document.getElementById('resultX');
 const resultYEl    = document.getElementById('resultY');
 const ratioLabelEl = document.getElementById('ratioLabel');
 const mainCanvas   = document.getElementById('mainCanvas');
 const mctx         = mainCanvas.getContext('2d');
-
-const BASE = 540, PL = 68, PB = 48, PT = 22, PR = 22, ITEM_H = 48;
+const ITEM_H = 48;
 
 function initStepReel(key) {
   const reel  = document.getElementById('reel_' + key);
@@ -671,17 +670,16 @@ function initStepReel(key) {
     html += '<div class="slot-number">' + i + '</div>';
   strip.innerHTML = html;
 
-  function updatePos(anim = true) {
+  function pos(anim) {
     if (!anim) strip.style.transition = 'none';
-    const idx = item.val - item.min;
-    strip.style.transform = 'translateY(' + (-(idx * ITEM_H) + (54/2 - ITEM_H/2)) + 'px)';
+    strip.style.transform = 'translateY(' + (-(item.val - item.min) * ITEM_H + (54/2 - ITEM_H/2)) + 'px)';
     if (!anim) { strip.getBoundingClientRect(); strip.style.transition = ''; }
   }
 
   reel.addEventListener('wheel', e => {
     e.preventDefault();
     item.val = Math.max(item.min, Math.min(item.max, item.val + (e.deltaY > 0 ? -1 : 1)));
-    updatePos(); refresh();
+    pos(true); refresh();
   }, { passive:false });
 
   let sy0 = 0, drag = false;
@@ -689,10 +687,7 @@ function initStepReel(key) {
   window.addEventListener('mousemove', e => {
     if (!drag) return;
     const d = e.clientY - sy0;
-    if (Math.abs(d) > 10) {
-      item.val = Math.max(item.min, Math.min(item.max, item.val + (d > 0 ? -1 : 1)));
-      sy0 = e.clientY; updatePos(); refresh();
-    }
+    if (Math.abs(d) > 10) { item.val = Math.max(item.min, Math.min(item.max, item.val + (d > 0 ? -1 : 1))); sy0 = e.clientY; pos(true); refresh(); }
   });
   window.addEventListener('mouseup', () => { drag = false; });
   reel.addEventListener('touchstart', e => { sy0 = e.touches[0].clientY; drag = true; }, { passive:true });
@@ -700,13 +695,10 @@ function initStepReel(key) {
     if (!drag) return;
     if (e.cancelable) e.preventDefault();
     const d = e.touches[0].clientY - sy0;
-    if (Math.abs(d) > 10) {
-      item.val = Math.max(item.min, Math.min(item.max, item.val + (d > 0 ? -1 : 1)));
-      sy0 = e.touches[0].clientY; updatePos(); refresh();
-    }
+    if (Math.abs(d) > 10) { item.val = Math.max(item.min, Math.min(item.max, item.val + (d > 0 ? -1 : 1))); sy0 = e.touches[0].clientY; pos(true); refresh(); }
   }, { passive:false });
   reel.addEventListener('touchend', () => { drag = false; });
-  updatePos(false);
+  pos(false);
 }
 
 function initSplitButtons(key) {
@@ -720,123 +712,81 @@ function initSplitButtons(key) {
   });
 }
 
-function tx(ctx, text, x, y, fill, stroke='#fff', sw=3) {
-  if (text == null) return;
-  ctx.strokeStyle = stroke; ctx.lineWidth = sw; ctx.lineJoin = 'round';
-  ctx.strokeText(String(text), x, y);
-  ctx.fillStyle = fill; ctx.fillText(String(text), x, y);
-}
-
-function drawGrid(ctx, canvas, stepX, stepY, splitX, splitY, opts) {
-  opts = opts || {};
-  const base  = opts.base  || BASE;
-  const pl    = opts.pl    || PL;
-  const pb    = opts.pb    || PB;
-  const pt    = opts.pt    || PT;
-  const pr    = opts.pr    || PR;
-  const lw    = opts.lw    || 2;
-  const alpha = opts.alpha !== undefined ? opts.alpha : 1;
-  const showLabel = opts.showLabel !== false;
-
-  const maxW = base - pl - pr, maxH = base - pt - pb;
+function drawMainGrid() {
+  const { stepX:{val:sx}, splitX:{val:spx}, stepY:{val:sy}, splitY:{val:spy} } = config;
+  const BASE=540, PL=68, PB=48, PT=22, PR=22;
+  const maxW = BASE-PL-PR, maxH = BASE-PT-PB;
   let gw, gh;
-  if (stepX >= stepY) { gw = maxW; gh = maxH * stepY / stepX; }
-  else                { gh = maxH; gw = maxW * stepX / stepY; }
+  if (sx >= sy) { gw = maxW; gh = maxH * sy / sx; }
+  else          { gh = maxH; gw = maxW * sx / sy; }
+  mctx.clearRect(0, 0, BASE, BASE);
+  const ox = PL, oy = PT + (maxH - gh);
+  const cw = gw / spx, ch = gh / spy;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const sx = pl, sy = pt + (maxH - gh);
-  const cw = gw / splitX, ch = gh / splitY;
-
-  ctx.save();
-  ctx.globalAlpha = alpha;
-
-  // チェッカー背景
-  for (let xi = 0; xi < splitX; xi++)
-    for (let yi = 0; yi < splitY; yi++) {
-      ctx.fillStyle = (xi + yi) % 2 === 0 ? '#fff' : '#F0F4FA';
-      ctx.fillRect(sx + xi*cw, sy + yi*ch, cw, ch);
+  for (let xi = 0; xi < spx; xi++)
+    for (let yi = 0; yi < spy; yi++) {
+      mctx.fillStyle = (xi+yi)%2===0 ? '#fff' : '#F0F4FA';
+      mctx.fillRect(ox+xi*cw, oy+yi*ch, cw, ch);
     }
+  mctx.strokeStyle='rgba(29,95,168,.3)'; mctx.lineWidth=1.5;
+  for (let i=1;i<spx;i++){mctx.beginPath();mctx.moveTo(ox+i*cw,oy);mctx.lineTo(ox+i*cw,oy+gh);mctx.stroke();}
+  for (let i=1;i<spy;i++){mctx.beginPath();mctx.moveTo(ox,oy+i*ch);mctx.lineTo(ox+gw,oy+i*ch);mctx.stroke();}
+  mctx.strokeStyle='#18181B'; mctx.lineWidth=4; mctx.strokeRect(ox,oy,gw,gh);
 
-  // グリッド線
-  ctx.strokeStyle = 'rgba(29,95,168,.35)'; ctx.lineWidth = lw;
-  for (let i = 1; i < splitX; i++) {
-    const x = sx + i*cw;
-    ctx.beginPath(); ctx.moveTo(x, sy); ctx.lineTo(x, sy+gh); ctx.stroke();
+  if (spx<=15 && spy<=15) {
+    const fs=Math.max(9,Math.min(13,Math.min(cw,ch)*0.21));
+    mctx.font='600 '+fs+'px "Roboto Mono",monospace';
+    mctx.textAlign='center'; mctx.textBaseline='middle';
+    for (let xi=0;xi<spx;xi++) for (let yi=0;yi<spy;yi++) {
+      const px=ox+xi*cw+cw/2, py=oy+gh-yi*ch-ch/2;
+      mctx.strokeStyle='#fff'; mctx.lineWidth=2.5; mctx.lineJoin='round';
+      mctx.strokeText((xi+1)+','+(yi+1),px,py);
+      mctx.fillStyle='#18181B'; mctx.fillText((xi+1)+','+(yi+1),px,py);
+    }
   }
-  for (let i = 1; i < splitY; i++) {
-    const y = sy + i*ch;
-    ctx.beginPath(); ctx.moveTo(sx, y); ctx.lineTo(sx+gw, y); ctx.stroke();
-  }
-
-  // 外枠
-  ctx.strokeStyle = '#18181B'; ctx.lineWidth = lw * 2;
-  ctx.strokeRect(sx, sy, gw, gh);
-
-  // マス番号
-  if (splitX <= 15 && splitY <= 15) {
-    const fs = Math.max(9, Math.min(13, Math.min(cw, ch) * 0.21));
-    ctx.font = '600 ' + fs + 'px "Roboto Mono",monospace';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    for (let xi = 0; xi < splitX; xi++)
-      for (let yi = 0; yi < splitY; yi++) {
-        const px = sx + xi*cw + cw/2;
-        const py = sy + gh - yi*ch - ch/2;
-        tx(ctx, (xi+1)+','+(yi+1), px, py, '#18181B', '#fff', 2);
-      }
-  }
-
-  if (showLabel) {
-    ctx.font = '700 12px "Noto Sans JP",sans-serif';
-    ctx.textBaseline = 'top'; ctx.textAlign = 'center';
-    tx(ctx, '0', sx, sy+gh+9, '#1D5FA8', '#fff', 2);
-    tx(ctx, stepX.toLocaleString()+'歩', sx+gw, sy+gh+9, '#1D5FA8', '#fff', 2);
-    if (splitX >= 2 && gw > 160)
-      tx(ctx, Math.round(stepX/2).toLocaleString(), sx+gw/2, sy+gh+9, '#A1A1AA', '#fff', 2);
-    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-    tx(ctx, '0', sx-8, sy+gh, '#1D5FA8', '#fff', 2);
-    tx(ctx, stepY.toLocaleString()+'歩', sx-8, sy, '#1D5FA8', '#fff', 2);
-    ctx.fillStyle = '#1D5FA8';
-    ctx.beginPath(); ctx.moveTo(sx+gw+12,sy+gh); ctx.lineTo(sx+gw+6,sy+gh-4); ctx.lineTo(sx+gw+6,sy+gh+4); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(sx,sy-12); ctx.lineTo(sx-4,sy-6); ctx.lineTo(sx+4,sy-6); ctx.closePath(); ctx.fill();
-  }
-
-  ctx.restore();
+  mctx.font='700 12px "Noto Sans JP",sans-serif';
+  mctx.textBaseline='top'; mctx.textAlign='center';
+  [[ox,'0'],[ox+gw,sx.toLocaleString()+'歩']].forEach(([x,t])=>{
+    mctx.strokeStyle='#fff';mctx.lineWidth=2;mctx.strokeText(t,x,oy+gh+9);
+    mctx.fillStyle='#1D5FA8';mctx.fillText(t,x,oy+gh+9);
+  });
+  mctx.textAlign='right'; mctx.textBaseline='middle';
+  [[oy+gh,'0'],[oy,sy.toLocaleString()+'歩']].forEach(([y,t])=>{
+    mctx.strokeStyle='#fff';mctx.lineWidth=2;mctx.strokeText(t,ox-8,y);
+    mctx.fillStyle='#1D5FA8';mctx.fillText(t,ox-8,y);
+  });
 }
 
 function pop(el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 
 function refresh() {
   const { stepX:{val:sx}, splitX:{val:spx}, stepY:{val:sy}, splitY:{val:spy} } = config;
-  ratioLabelEl.textContent = 'X : Y = ' + (Math.round(sx/sy*100)/100) + ' : 1';
-  const rx = Math.round(sx/spx*10)/10;
-  const ry = Math.round(sy/spy*10)/10;
-  resultXEl.textContent = rx.toLocaleString();
-  resultYEl.textContent = ry.toLocaleString();
+  ratioLabelEl.textContent = 'X : Y = '+(Math.round(sx/sy*100)/100)+' : 1';
+  resultXEl.textContent = (Math.round(sx/spx*10)/10).toLocaleString();
+  resultYEl.textContent = (Math.round(sy/spy*10)/10).toLocaleString();
   pop(resultXEl); pop(resultYEl);
-  drawGrid(mctx, mainCanvas, sx, sy, spx, spy);
-  if (camRunning) drawOverlay();
+  drawMainGrid();
+  drawOverlay();
 }
 
-/* ════════════════════════════════════════════════
-   PANEL B — Camera + Overlay
-════════════════════════════════════════════════ */
-let camRunning   = false;
-let isLocked     = false;
-let videoStream  = null;
-
-const video        = document.getElementById('camVideo');
-const overlayC     = document.getElementById('overlayCanvas');
-const octx         = overlayC.getContext('2d');
-const viewport     = document.getElementById('camViewport');
-const touchLayer   = document.getElementById('camTouchLayer');
-const lockOverlay  = document.getElementById('lockOverlay');
+/* ════════════════════════════
+   PANEL B — 図面確認
+════════════════════════════ */
+const fileInput    = document.getElementById('fileInput');
+const imgDropArea  = document.getElementById('imgDropArea');
+const imgThumb     = document.getElementById('imgThumb');
+const preViewport  = document.getElementById('preViewport');
+const prePlaceholder = document.getElementById('prePlaceholder');
+const preBgImg     = document.getElementById('preBgImg');
+const overlaySVG   = document.getElementById('overlaySVG');
+const preTouchLayer= document.getElementById('preTouchLayer');
 const lockBanner   = document.getElementById('lockBanner');
 const btnLock      = document.getElementById('btnLock');
 
-// オーバーレイ状態
-let ov = { x: 0, y: 0, scale: 0.8, rotate: 0, opacity: 0.6, lw: 2 };
+let isLocked   = false;
+let bgImage    = null; // ロード済みImageオブジェクト
+let ov = { x:0, y:0, scale:0.8, rotate:0, opacity:0.6, lw:2 };
 
-// スライダー
 const slScale   = document.getElementById('slScale');
 const slRotate  = document.getElementById('slRotate');
 const slOpacity = document.getElementById('slOpacity');
@@ -846,273 +796,256 @@ const valRotate = document.getElementById('valRotate');
 const valOpacity= document.getElementById('valOpacity');
 const valLine   = document.getElementById('valLine');
 
-slScale.addEventListener('input', () => {
-  ov.scale = slScale.value / 100;
-  valScale.textContent = slScale.value + '%';
-  drawOverlay();
+slScale.addEventListener('input',   () => { ov.scale   = slScale.value/100;          valScale.textContent   = slScale.value+'%';   drawOverlay(); });
+slRotate.addEventListener('input',  () => { ov.rotate  = parseFloat(slRotate.value); valRotate.textContent  = slRotate.value+'°';  drawOverlay(); });
+slOpacity.addEventListener('input', () => { ov.opacity = slOpacity.value/100;        valOpacity.textContent = slOpacity.value+'%'; drawOverlay(); });
+slLine.addEventListener('input',    () => { ov.lw      = parseInt(slLine.value);      valLine.textContent    = slLine.value+'px';   drawOverlay(); });
+
+/* 画像選択 */
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+
+  // サムネ
+  imgThumb.src = url;
+  imgDropArea.classList.add('has-image');
+
+  // ビューポートに表示
+  prePlaceholder.style.display = 'none';
+  preBgImg.src = url;
+  preBgImg.style.display = 'block';
+  preViewport.classList.add('ready');
+
+  bgImage = new Image();
+  bgImage.onload = () => {
+    // 初期オーバーレイ位置をビューポート中央に
+    const vr = preViewport.getBoundingClientRect();
+    ov.x = vr.width  / 2;
+    ov.y = vr.height / 2;
+    drawOverlay();
+  };
+  bgImage.src = url;
 });
-slRotate.addEventListener('input', () => {
-  ov.rotate = slRotate.value * Math.PI / 180;
-  valRotate.textContent = slRotate.value + '°';
-  drawOverlay();
-});
-slOpacity.addEventListener('input', () => {
-  ov.opacity = slOpacity.value / 100;
-  valOpacity.textContent = slOpacity.value + '%';
-  drawOverlay();
-});
-slLine.addEventListener('input', () => {
-  ov.lw = parseInt(slLine.value);
-  valLine.textContent = slLine.value + 'px';
-  drawOverlay();
-});
 
-/* ─── Camera init ────────────────────────────── */
-async function initCamera() {
-  if (camRunning) return;
-  try {
-    // Android 14 + Chrome: getUserMedia制約を段階的に緩める
-    let stream;
-    const constraints = [
-      // ① 理想的な設定（解像度控えめ・Android14推奨）
-      { video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }, audio: false },
-      // ② facingModeのみ
-      { video: { facingMode: 'environment' }, audio: false },
-      // ③ 制約なし（最終手段）
-      { video: true, audio: false }
-    ];
-    for (const c of constraints) {
-      try { stream = await navigator.mediaDevices.getUserMedia(c); break; }
-      catch(e) { console.warn('getUserMedia failed:', c, e); }
-    }
-    if (!stream) throw new Error('No camera available');
-
-    videoStream = stream;
-
-    // Android 14: srcObject設定前にvideoを設定
-    video.setAttribute('autoplay', '');
-    video.setAttribute('playsinline', '');
-    video.setAttribute('muted', '');
-    video.muted = true;
-    video.srcObject = stream;
-    camRunning = true;
-
-    // play()を明示的にawait（Android 14 Chromeで必要）
-    await video.play().catch(e => console.warn('play() warning:', e));
-
-    // Android 14はloadedmetadataが遅れることがある
-    // → 複数タイミングでリサイズを試みる
-    const tryResize = () => {
-      if (video.videoWidth > 0 && video.videoHeight > 0) {
-        resizeOverlayCanvas();
-      }
-    };
-    video.addEventListener('loadedmetadata', tryResize);
-    video.addEventListener('loadeddata',     tryResize);
-    video.addEventListener('canplay',        tryResize);
-    video.addEventListener('resize', resizeOverlayCanvas);
-    window.addEventListener('resize', resizeOverlayCanvas);
-    // 念押し：100ms / 500ms / 1000ms 後にもリサイズ試行
-    [100, 500, 1000].forEach(t => setTimeout(tryResize, t));
-
-    requestAnimationFrame(renderLoop);
-  } catch(e) {
-    console.error('Camera error:', e);
-    document.getElementById('camUnavail').classList.add('show');
-  }
-}
-
-function resizeOverlayCanvas() {
-  // viewportのBCRを使うが、videoの実際の表示サイズを優先
-  const vp = viewport.getBoundingClientRect();
-  const w  = vp.width  || video.offsetWidth  || 360;
-  const h  = vp.height || video.offsetHeight || 320;
-  overlayC.width  = w;
-  overlayC.height = h;
-  // 初期位置：中央
-  if (ov.x === 0 && ov.y === 0) {
-    ov.x = w / 2;
-    ov.y = h / 2;
-  }
-  drawOverlay();
-}
-
-/* ─── Render loop ────────────────────────────── */
-let rafId = null;
-function renderLoop() {
-  drawOverlay();
-  rafId = requestAnimationFrame(renderLoop);
-}
-
-/* ─── Draw overlay ───────────────────────────── */
+/* SVGオーバーレイ描画 */
 function drawOverlay() {
-  if (!overlayC.width) return;
   const { stepX:{val:sx}, splitX:{val:spx}, stepY:{val:sy}, splitY:{val:spy} } = config;
+  const NS  = 'http://www.w3.org/2000/svg';
+  const SZ  = 400;
 
-  // グリッドを一旦オフスクリーンに描画
-  const off = document.createElement('canvas');
-  off.width  = BASE;
-  off.height = BASE;
-  const offctx = off.getContext('2d');
-  drawGrid(offctx, off, sx, sy, spx, spy, { showLabel:false, lw: ov.lw });
+  const vr  = preViewport.getBoundingClientRect();
+  const vw  = vr.width  || 360;
+  const vh  = vr.height || 300;
 
-  // overlayCanvasをクリアして変換を適用してグリッドを貼り付け
-  octx.clearRect(0, 0, overlayC.width, overlayC.height);
-  octx.save();
-  octx.translate(ov.x, ov.y);
-  octx.rotate(ov.rotate);
-  octx.scale(ov.scale, ov.scale);
-  octx.globalAlpha = ov.opacity;
-  octx.drawImage(off, -BASE/2, -BASE/2);
-  octx.restore();
+  overlaySVG.setAttribute('viewBox', '0 0 '+vw+' '+vh);
+  overlaySVG.setAttribute('width',  vw);
+  overlaySVG.setAttribute('height', vh);
+
+  while (overlaySVG.firstChild) overlaySVG.removeChild(overlaySVG.firstChild);
+
+  // グリッド計算
+  let gw, gh;
+  if (sx >= sy) { gw = SZ; gh = SZ * sy / sx; }
+  else          { gh = SZ; gw = SZ * sx / sy; }
+  const ox = (SZ - gw) / 2, oy = (SZ - gh) / 2;
+  const cw = gw / spx,      ch = gh / spy;
+
+  const gridG = document.createElementNS(NS, 'g');
+
+  // チェッカー
+  for (let xi=0; xi<spx; xi++) for (let yi=0; yi<spy; yi++) {
+    const r = document.createElementNS(NS,'rect');
+    r.setAttribute('x', ox+xi*cw); r.setAttribute('y', oy+yi*ch);
+    r.setAttribute('width', cw);   r.setAttribute('height', ch);
+    r.setAttribute('fill', (xi+yi)%2===0 ? 'rgba(255,255,255,0.85)' : 'rgba(220,235,255,0.85)');
+    gridG.appendChild(r);
+  }
+  // 縦線
+  for (let i=1; i<spx; i++) {
+    const l = document.createElementNS(NS,'line');
+    l.setAttribute('x1', ox+i*cw); l.setAttribute('y1', oy);
+    l.setAttribute('x2', ox+i*cw); l.setAttribute('y2', oy+gh);
+    l.setAttribute('stroke','rgba(29,95,168,0.7)'); l.setAttribute('stroke-width', ov.lw);
+    gridG.appendChild(l);
+  }
+  // 横線
+  for (let i=1; i<spy; i++) {
+    const l = document.createElementNS(NS,'line');
+    l.setAttribute('x1', ox);    l.setAttribute('y1', oy+i*ch);
+    l.setAttribute('x2', ox+gw); l.setAttribute('y2', oy+i*ch);
+    l.setAttribute('stroke','rgba(29,95,168,0.7)'); l.setAttribute('stroke-width', ov.lw);
+    gridG.appendChild(l);
+  }
+  // 外枠
+  const border = document.createElementNS(NS,'rect');
+  border.setAttribute('x',ox); border.setAttribute('y',oy);
+  border.setAttribute('width',gw); border.setAttribute('height',gh);
+  border.setAttribute('fill','none');
+  border.setAttribute('stroke','#18181B'); border.setAttribute('stroke-width', ov.lw*2);
+  gridG.appendChild(border);
+
+  // マス番号
+  if (spx<=15 && spy<=15) {
+    const fs = Math.max(8, Math.min(14, Math.min(cw,ch)*0.22));
+    for (let xi=0; xi<spx; xi++) for (let yi=0; yi<spy; yi++) {
+      const px = ox+xi*cw+cw/2, py = oy+yi*ch+ch/2;
+      const t = document.createElementNS(NS,'text');
+      t.setAttribute('x',px); t.setAttribute('y',py);
+      t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','middle');
+      t.setAttribute('font-size',fs); t.setAttribute('font-weight','600');
+      t.setAttribute('font-family','Roboto Mono,monospace');
+      t.setAttribute('stroke','#fff'); t.setAttribute('stroke-width',3);
+      t.setAttribute('paint-order','stroke'); t.setAttribute('fill','#18181B');
+      t.textContent = (xi+1)+','+(yi+1);
+      gridG.appendChild(t);
+    }
+  }
+
+  // ラッパーでtransform
+  const wrapper = document.createElementNS(NS,'g');
+  const cx = ov.x || vw/2, cy = ov.y || vh/2;
+  const half = SZ/2;
+  wrapper.setAttribute('transform',
+    'translate('+cx+','+cy+') rotate('+ov.rotate+') scale('+ov.scale+') translate('+ (-half)+','+ (-half)+')'
+  );
+  wrapper.setAttribute('opacity', ov.opacity);
+  wrapper.appendChild(gridG);
+  overlaySVG.appendChild(wrapper);
 }
 
-/* ─── Touch / Mouse drag on overlay ─────────── */
-let dragState = { active:false, startX:0, startY:0, startOvX:0, startOvY:0 };
-let pinchState = { active:false, startDist:0, startScale:0, startAngle:0, startRot:0 };
+/* タッチ / マウス操作 */
+let dragState  = { active:false, sx:0, sy:0, ox:0, oy:0 };
+let pinchState = { active:false, sd:0, ss:0, sa:0, sr:0 };
 
-function getTouchDist(t) {
-  const dx = t[0].clientX - t[1].clientX;
-  const dy = t[0].clientY - t[1].clientY;
-  return Math.sqrt(dx*dx + dy*dy);
-}
-function getTouchAngle(t) {
-  return Math.atan2(t[1].clientY - t[0].clientY, t[1].clientX - t[0].clientX);
-}
-function clientToCanvas(clientX, clientY) {
-  const r = overlayC.getBoundingClientRect();
-  return { x: clientX - r.left, y: clientY - r.top };
-}
+function dist2(t)  { const dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY; return Math.sqrt(dx*dx+dy*dy); }
+function angle2(t) { return Math.atan2(t[1].clientY-t[0].clientY, t[1].clientX-t[0].clientX)*180/Math.PI; }
+function toLocal(cx,cy) { const r=preViewport.getBoundingClientRect(); return { x:cx-r.left, y:cy-r.top }; }
 
-touchLayer.addEventListener('mousedown', e => {
+preTouchLayer.addEventListener('mousedown', e => {
   if (isLocked) return;
-  const p = clientToCanvas(e.clientX, e.clientY);
-  dragState = { active:true, startX:p.x, startY:p.y, startOvX:ov.x, startOvY:ov.y };
+  const p = toLocal(e.clientX, e.clientY);
+  dragState = { active:true, sx:p.x, sy:p.y, ox:ov.x, oy:ov.y };
 });
 window.addEventListener('mousemove', e => {
-  if (!dragState.active || isLocked) return;
-  const p = clientToCanvas(e.clientX, e.clientY);
-  ov.x = dragState.startOvX + (p.x - dragState.startX);
-  ov.y = dragState.startOvY + (p.y - dragState.startY);
+  if (!dragState.active||isLocked) return;
+  const p = toLocal(e.clientX, e.clientY);
+  ov.x = dragState.ox + (p.x - dragState.sx);
+  ov.y = dragState.oy + (p.y - dragState.sy);
   drawOverlay();
 });
 window.addEventListener('mouseup', () => { dragState.active = false; });
 
-touchLayer.addEventListener('touchstart', e => {
+preTouchLayer.addEventListener('touchstart', e => {
   if (isLocked) return;
   e.preventDefault();
   if (e.touches.length === 1) {
-    const p = clientToCanvas(e.touches[0].clientX, e.touches[0].clientY);
-    dragState = { active:true, startX:p.x, startY:p.y, startOvX:ov.x, startOvY:ov.y };
+    const p = toLocal(e.touches[0].clientX, e.touches[0].clientY);
+    dragState  = { active:true, sx:p.x, sy:p.y, ox:ov.x, oy:ov.y };
     pinchState.active = false;
   } else if (e.touches.length === 2) {
     dragState.active = false;
-    pinchState = {
-      active: true,
-      startDist:  getTouchDist(e.touches),
-      startScale: ov.scale,
-      startAngle: getTouchAngle(e.touches),
-      startRot:   ov.rotate
-    };
+    pinchState = { active:true, sd:dist2(e.touches), ss:ov.scale, sa:angle2(e.touches), sr:ov.rotate };
   }
 }, { passive:false });
 
-touchLayer.addEventListener('touchmove', e => {
+preTouchLayer.addEventListener('touchmove', e => {
   if (isLocked) return;
   e.preventDefault();
-  if (e.touches.length === 1 && dragState.active) {
-    const p = clientToCanvas(e.touches[0].clientX, e.touches[0].clientY);
-    ov.x = dragState.startOvX + (p.x - dragState.startX);
-    ov.y = dragState.startOvY + (p.y - dragState.startY);
+  if (e.touches.length===1 && dragState.active) {
+    const p = toLocal(e.touches[0].clientX, e.touches[0].clientY);
+    ov.x = dragState.ox + (p.x - dragState.sx);
+    ov.y = dragState.oy + (p.y - dragState.sy);
     drawOverlay();
-  } else if (e.touches.length === 2 && pinchState.active) {
-    const dist  = getTouchDist(e.touches);
-    const angle = getTouchAngle(e.touches);
-    ov.scale  = Math.max(0.1, Math.min(4, pinchState.startScale  * (dist / pinchState.startDist)));
-    ov.rotate = pinchState.startRot + (angle - pinchState.startAngle);
-    // スライダーに反映
-    slScale.value  = Math.round(ov.scale * 100);
-    valScale.textContent = slScale.value + '%';
-    slRotate.value = Math.round(ov.rotate * 180 / Math.PI);
-    valRotate.textContent = slRotate.value + '°';
+  } else if (e.touches.length===2 && pinchState.active) {
+    const d = dist2(e.touches), a = angle2(e.touches);
+    ov.scale  = Math.max(0.05, Math.min(5, pinchState.ss * (d / pinchState.sd)));
+    ov.rotate = pinchState.sr + (a - pinchState.sa);
+    slScale.value  = Math.round(ov.scale*100); valScale.textContent  = slScale.value+'%';
+    slRotate.value = Math.round(ov.rotate);    valRotate.textContent = slRotate.value+'°';
     drawOverlay();
   }
 }, { passive:false });
 
-touchLayer.addEventListener('touchend', () => {
-  dragState.active  = false;
-  pinchState.active = false;
-});
+preTouchLayer.addEventListener('touchend', () => { dragState.active = pinchState.active = false; });
 
-/* ─── Lock ───────────────────────────────────── */
+/* ロック */
 function toggleLock() {
   isLocked = !isLocked;
-  lockOverlay.classList.toggle('active', isLocked);
   lockBanner.classList.toggle('active', isLocked);
   btnLock.querySelector('.b-icon').textContent = isLocked ? '🔒' : '🔓';
   btnLock.querySelector('.b-ja').textContent   = isLocked ? 'ロック中' : 'ロック';
 }
 
-/* ─── Reset ──────────────────────────────────── */
+/* リセット */
 function resetOverlay() {
-  ov.x = overlayC.width / 2;
-  ov.y = overlayC.height / 2;
-  ov.scale   = 0.8;  slScale.value   = 80;  valScale.textContent  = '80%';
-  ov.rotate  = 0;    slRotate.value  = 0;   valRotate.textContent = '0°';
-  ov.opacity = 0.6;  slOpacity.value = 60;  valOpacity.textContent= '60%';
-  ov.lw      = 2;    slLine.value    = 2;   valLine.textContent   = '2px';
+  const vr = preViewport.getBoundingClientRect();
+  ov = { x: vr.width/2, y: vr.height/2, scale:0.8, rotate:0, opacity:0.6, lw:2 };
+  slScale.value=80;  valScale.textContent='80%';
+  slRotate.value=0;  valRotate.textContent='0°';
+  slOpacity.value=60; valOpacity.textContent='60%';
+  slLine.value=2;    valLine.textContent='2px';
   drawOverlay();
 }
 
-/* ─── Save ───────────────────────────────────── */
+/* 保存（Canvas合成） */
 function saveImage() {
-  // 合成用キャンバス（ビューポートと同サイズ）
+  if (!bgImage) { alert('図面を選択してください / Please select a drawing'); return; }
+
+  const vr  = preViewport.getBoundingClientRect();
+  const vw  = Math.round(vr.width);
+  const vh  = Math.round(preBgImg.getBoundingClientRect().height) || Math.round(vr.height);
+
   const comp = document.createElement('canvas');
-  comp.width  = overlayC.width;
-  comp.height = overlayC.height;
+  comp.width  = vw * 2;  // 解像度2倍
+  comp.height = vh * 2;
   const cctx  = comp.getContext('2d');
+  cctx.scale(2, 2);
 
-  // ① 映像フレーム
-  const vr = video.getBoundingClientRect();
-  const vp = viewport.getBoundingClientRect();
-  // video要素の表示サイズに合わせてスケール
-  const scaleX = comp.width  / vp.width;
-  const scaleY = comp.height / vp.height;
-  cctx.drawImage(video, 0, 0, comp.width, comp.height);
+  // ① 背景画像
+  cctx.drawImage(bgImage, 0, 0, vw, vh);
 
-  // ② グリッドオーバーレイ
-  cctx.drawImage(overlayC, 0, 0);
+  // ② SVGをシリアライズ → Blob → ImageBitmap → canvas
+  const svgStr = new XMLSerializer().serializeToString(overlaySVG);
+  const blob   = new Blob([svgStr], { type:'image/svg+xml' });
+  const url    = URL.createObjectURL(blob);
+  const svgImg = new Image();
+  svgImg.onload = () => {
+    cctx.drawImage(svgImg, 0, 0, vw, vh);
+    URL.revokeObjectURL(url);
 
-  // ③ 情報ウォーターマーク
-  const { stepX:{val:sx}, splitX:{val:spx}, stepY:{val:sy}, splitY:{val:spy} } = config;
-  const stamp = 'X:' + sx + '歩/' + spx + '等分  Y:' + sy + '歩/' + spy + '等分  ' + now();
-  cctx.save();
-  cctx.font = 'bold 13px "Noto Sans JP",sans-serif';
-  cctx.fillStyle = 'rgba(0,0,0,.55)';
-  const tw = cctx.measureText(stamp).width;
-  cctx.fillRect(8, comp.height - 30, tw + 16, 24);
-  cctx.fillStyle = '#FFCB05';
-  cctx.textBaseline = 'middle';
-  cctx.fillText(stamp, 16, comp.height - 18);
-  cctx.restore();
+    // ③ ウォーターマーク
+    const { stepX:{val:sx}, splitX:{val:spx}, stepY:{val:sy}, splitY:{val:spy} } = config;
+    const stamp = 'X:'+sx+'歩/'+spx+'等分  Y:'+sy+'歩/'+spy+'等分  '+nowStr();
+    cctx.font = 'bold 11px "Noto Sans JP",sans-serif';
+    const tw = cctx.measureText(stamp).width;
+    cctx.fillStyle = 'rgba(0,0,0,.55)';
+    cctx.fillRect(6, vh-26, tw+14, 22);
+    cctx.fillStyle = '#FFCB05';
+    cctx.textBaseline = 'middle';
+    cctx.fillText(stamp, 13, vh-15);
 
-  // ダウンロード
-  const a = document.createElement('a');
-  a.href     = comp.toDataURL('image/png');
-  a.download = 'survey_preview_' + nowFile() + '.png';
-  a.click();
-  showToast();
+    // ダウンロード
+    const a = document.createElement('a');
+    a.href     = comp.toDataURL('image/png');
+    a.download = 'survey_preview_'+nowFile()+'.png';
+    a.click();
+    showToast();
+  };
+  svgImg.onerror = () => {
+    // SVG合成失敗時は画像だけ保存
+    const a = document.createElement('a');
+    a.href     = comp.toDataURL('image/png');
+    a.download = 'survey_preview_'+nowFile()+'.png';
+    a.click();
+    showToast();
+  };
+  svgImg.src = url;
 }
 
-function now() {
-  const d = new Date();
-  return d.getFullYear() + '/' + pad(d.getMonth()+1) + '/' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-}
-function nowFile() {
-  const d = new Date();
-  return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes());
-}
 function pad(n) { return String(n).padStart(2,'0'); }
+function nowStr() { const d=new Date(); return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes()); }
+function nowFile() { const d=new Date(); return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'_'+pad(d.getHours())+pad(d.getMinutes()); }
 
 function showToast() {
   const t = document.getElementById('toast');
@@ -1120,9 +1053,9 @@ function showToast() {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-/* ════════════════════════════════════════════════
+/* ════════════════════════════
    INIT
-════════════════════════════════════════════════ */
+════════════════════════════ */
 initStepReel('stepX');
 initStepReel('stepY');
 initSplitButtons('splitX');
